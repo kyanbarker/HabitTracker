@@ -1,24 +1,34 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
-// Define types for our state and parameters
-type CalendarDay = number | null;
-type CalendarWeek = CalendarDay[];
+type CalendarCell = number | null;
+type CalendarRow = CalendarCell[];
 
 interface CalendarProps {
-  // Using Date object for input
-  date?: Date;
-  // Optional callback for when a day is clicked
-  onDayClick?: (day: Date | null) => void;
+  initialDate?: Date;
+  // Optional callback for when this calendar is clicked
+  onClick?: (day: Date | null) => void;
 }
 
 const Calendar: React.FC<CalendarProps> = ({
-  date = new Date(),
-  onDayClick,
+  initialDate = new Date(),
+  onClick,
 }) => {
-  const month = date.getMonth();
-  const year = date.getFullYear();
+  // State to track the current viewed month and year
+  const [currentDate, setCurrentDate] = useState(initialDate);
 
-  const [calendarDays, setCalendarDays] = useState<CalendarDay[]>([]);
+  const month = currentDate.getMonth();
+  const year = currentDate.getFullYear();
+
+  const [calendarCells, setCalendarCells] = useState<CalendarCell[]>([]);
+
+  // Navigation functions
+  const goToPreviousMonth = () => {
+    setCurrentDate(new Date(year, month - 1, 1));
+  };
+
+  const goToNextMonth = () => {
+    setCurrentDate(new Date(year, month + 1, 1));
+  };
 
   useEffect(() => {
     // Calculate days in month (i.e. the day of the month of the last day of the month)
@@ -27,23 +37,23 @@ const Calendar: React.FC<CalendarProps> = ({
     // Get the day of the week of the first day of the month (0 = Sunday, 1 = Monday, etc.)
     const firstDayOfMonth = new Date(year, month, 1).getDay();
 
-    const calendarDays: CalendarDay[] = [];
+    const calendarCells: CalendarCell[] = [];
 
     // Add empty cells for days before the first day of the month
-    for (let i = 0; i < firstDayOfMonth; i++) calendarDays.push(null);
+    for (let i = 0; i < firstDayOfMonth; i++) calendarCells.push(null);
 
     // Add days of the month
-    for (let day = 1; day <= daysInMonth; day++) calendarDays.push(day);
+    for (let day = 1; day <= daysInMonth; day++) calendarCells.push(day);
 
-    // Add empty cells for days after the last day of the month
-    while (calendarDays.length % 7 !== 0) calendarDays.push(null);
+    // Add empty cells to fill the last row of the grid
+    while (calendarCells.length % 7 !== 0) calendarCells.push(null);
 
-    setCalendarDays(calendarDays);
-  }, [year, month]);
+    setCalendarCells(calendarCells);
+  }, [year, month]); // Now this will re-run whenever the month or year changes
 
-  const weeks: CalendarWeek[] = [];
-  for (let i = 0; i < calendarDays.length; i += 7) {
-    weeks.push(calendarDays.slice(i, i + 7));
+  const rows: CalendarRow[] = [];
+  for (let i = 0; i < calendarCells.length; i += 7) {
+    rows.push(calendarCells.slice(i, i + 7));
   }
 
   const daysOfWeek: string[] = [
@@ -56,34 +66,82 @@ const Calendar: React.FC<CalendarProps> = ({
     "Sat",
   ];
 
-  const handleDayClick = (day: CalendarDay) => {
-    if (!onDayClick) return;
+  const handleClick = (day: CalendarCell) => {
+    if (!onClick) return;
     if (day === null) {
-      onDayClick(null);
+      onClick(null);
       return;
     }
     // If we reach this point, we know that day !== null and onDayClick is truthy
     // Create a new Date object for the clicked day
     const clickedDate = new Date(year, month, day);
-    onDayClick(clickedDate);
+    onClick(clickedDate);
   };
 
-  // Calculate if we need all weeks or can display fewer
-  const visibleWeeks = weeks.filter((week, index) => {
+  // Calculate if we need all rows or can display fewer
+  const visibleRows = rows.filter((row, index) => {
     if (index === 5) {
-      return week.some((day) => day !== null);
+      return row.some((cell) => cell !== null);
     }
     return true;
   });
 
+  const previousMonthButton = (
+    <button
+      onClick={goToPreviousMonth}
+      className="text-white hover:bg-blue-700 rounded-full p-1"
+      aria-label="Previous month"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-6 w-6"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M15 19l-7-7 7-7"
+        />
+      </svg>
+    </button>
+  );
+
+  const nextMonthButton = (
+    <button
+      onClick={goToNextMonth}
+      className="text-white hover:bg-blue-700 rounded-full p-1"
+      aria-label="Next month"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-6 w-6"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M9 5l7 7-7 7"
+        />
+      </svg>
+    </button>
+  );
+
   const calendarHeader = (
-    <div className="bg-blue-600 text-white p-4">
+    <div className="bg-blue-600 text-white p-4 flex justify-between items-center">
+      {previousMonthButton}
       <h2 className="font-bold text-xl">
-        {date.toLocaleDateString("en-US", {
+        {currentDate.toLocaleDateString("en-US", {
           month: "long",
           year: "numeric",
         })}
       </h2>
+      {nextMonthButton}
     </div>
   );
 
@@ -92,7 +150,7 @@ const Calendar: React.FC<CalendarProps> = ({
       {daysOfWeek.map((day, index) => (
         <div
           key={index}
-          className="p-2 w-16 text-center font-medium text-gray-800 text-sm"
+          className="p-2 w-16 text-center font-medium text-gray-800 text-sm border-r last:border-r-0"
         >
           {day}
         </div>
@@ -100,14 +158,20 @@ const Calendar: React.FC<CalendarProps> = ({
     </div>
   );
 
-  const dayGrid = (
+  const today = new Date();
+  const isToday = (day: number) =>
+    year === today.getFullYear() &&
+    month === today.getMonth() &&
+    day === today.getDate();
+
+  const grid = (
     <div>
-      {visibleWeeks.map((week, weekIndex) => (
+      {visibleRows.map((row, rowIndex) => (
         <div
-          key={weekIndex}
+          key={rowIndex}
           className="grid grid-cols-7 border-b last:border-b-0"
         >
-          {week.map((day, dayIndex) => (
+          {row.map((day, dayIndex) => (
             <div
               key={dayIndex}
               className={`
@@ -117,12 +181,12 @@ const Calendar: React.FC<CalendarProps> = ({
                     ? "bg-white hover:bg-gray-100 cursor-pointer"
                     : "bg-gray-50"
                 }`}
-              onClick={() => handleDayClick(day)}
+              onClick={() => handleClick(day)}
             >
               {day && (
                 <div
                   className={`${
-                    day === date.getDate()
+                    isToday(day)
                       ? "h-8 w-8 rounded-full bg-blue-500 text-white flex items-center justify-center"
                       : "text-gray-700"
                   }`}
@@ -139,11 +203,11 @@ const Calendar: React.FC<CalendarProps> = ({
 
   return (
     <div className="rounded-lg shadow-lg bg-white overflow-hidden inline-block">
-      <div onClick={() => handleDayClick(null)}>
+      <div onClick={() => handleClick(null)}>
         {calendarHeader}
         {daysOfWeekHeader}
       </div>
-      {dayGrid}
+      {grid}
     </div>
   );
 };
