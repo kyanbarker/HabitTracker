@@ -2,12 +2,12 @@ import { useState } from "react";
 import Calendar from "./components/Calendar";
 
 function App() {
-  const [day, setDay] = useState<Date | null>(null);
+  const [selectedDay, setSelectedDay] = useState<Date | null>(null);
   return (
     <div className="p-8">
       <Calendar
         initialDate={new Date(2025, 4)}
-        onClick={(day) => setDay(day)}
+        onClick={(day) => setSelectedDay(day)}
         datesToHighlight={[
           new Date(2025, 4, 3),
           new Date(2025, 4, 1),
@@ -17,7 +17,7 @@ function App() {
           new Date(2025, 3, 20),
         ]}
       />
-      <h2>{day?.toDateString()}</h2>
+      <h2>{selectedDay?.toDateString()}</h2>
     </div>
   );
 }

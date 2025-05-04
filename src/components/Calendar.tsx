@@ -1,8 +1,12 @@
 import { isSameDay } from "date-fns";
 import { useEffect, useState } from "react";
 
-type CalendarCell = number | null;
+type CalendarCell = { day: number } | null;
 type CalendarRow = CalendarCell[];
+
+const EMPTY_CELL = null;
+const isEmptyCell = (cell: CalendarCell) => cell === EMPTY_CELL;
+const isDayCell = (cell: CalendarCell) => cell !== EMPTY_CELL;
 
 interface CalendarProps {
   initialDate?: Date;
@@ -34,8 +38,8 @@ const Calendar: React.FC<CalendarProps> = ({
   };
 
   useEffect(() => {
-    // Calculate days in month (i.e. the day of the month of the last day of the month)
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    // Calculate num days in month (i.e. the day of the month of the last day of the month)
+    const numDaysInMonth = new Date(year, month + 1, 0).getDate();
 
     // Get the day of the week of the first day of the month (0 = Sunday, 1 = Monday, etc.)
     const firstDayOfMonth = new Date(year, month, 1).getDay();
@@ -43,13 +47,13 @@ const Calendar: React.FC<CalendarProps> = ({
     const calendarCells: CalendarCell[] = [];
 
     // Add empty cells for days before the first day of the month
-    for (let i = 0; i < firstDayOfMonth; i++) calendarCells.push(null);
+    for (let i = 0; i < firstDayOfMonth; i++) calendarCells.push(EMPTY_CELL);
 
     // Add days of the month
-    for (let day = 1; day <= daysInMonth; day++) calendarCells.push(day);
+    for (let day = 1; day <= numDaysInMonth; day++) calendarCells.push({ day });
 
     // Add empty cells to fill the last row of the grid
-    while (calendarCells.length % 7 !== 0) calendarCells.push(null);
+    while (calendarCells.length % 7 !== 0) calendarCells.push(EMPTY_CELL);
 
     setCalendarCells(calendarCells);
   }, [year, month]); // Now this will re-run whenever the month or year changes
@@ -69,25 +73,14 @@ const Calendar: React.FC<CalendarProps> = ({
     "Sat",
   ];
 
-  const handleClick = (day: CalendarCell) => {
+  const handleCellClick = (cell: CalendarCell) => {
     if (!onClick) return;
-    if (day === null) {
-      onClick(null);
-      return;
-    }
-    // If we reach this point, we know that day !== null and onDayClick is truthy
-    // Create a new Date object for the clicked day
-    const clickedDate = new Date(year, month, day);
-    onClick(clickedDate);
+    onClick(isEmptyCell(cell) ? null : new Date(year, month, cell!.day));
   };
-
-  // Calculate if we need all rows or can display fewer
-  const visibleRows = rows.filter((row, index) => {
-    if (index === 5) {
-      return row.some((cell) => cell !== null);
-    }
-    return true;
-  });
+  const handleClickOutsideGrid = () => {
+    if (!onClick) return;
+    onClick(null);
+  };
 
   const previousMonthButton = (
     <button
@@ -163,7 +156,8 @@ const Calendar: React.FC<CalendarProps> = ({
 
   const today = new Date();
   const isToday = (day: number) => isSameDay(today, new Date(year, month, day));
-  const CellLabel = ({ day }: { day: number }) => (
+
+  const DayCellLabel = ({ day }: { day: number }) => (
     <div
       className={`${
         isToday(day)
@@ -180,32 +174,32 @@ const Calendar: React.FC<CalendarProps> = ({
       isSameDay(dateToHighlight, new Date(year, month, day))
     );
 
-  const Cell = ({ day }: { day: number | null }) => (
+  const Cell = ({ cell }: { cell: CalendarCell }) => (
     <div
       className={`
         p-2 w-16 h-16 border-r last:border-r-0 relative 
         ${
-          day === null
+          isEmptyCell(cell)
             ? "bg-gray-50"
-            : shouldHighlight(day)
+            : shouldHighlight(cell!.day)
             ? "bg-blue-100 hover:bg-blue-200 cursor-pointer"
             : "bg-white hover:bg-gray-100 cursor-pointer"
         }`}
-      onClick={() => handleClick(day)}
+      onClick={() => handleCellClick(cell)}
     >
-      {day && <CellLabel day={day} />}
+      {isDayCell(cell) && <DayCellLabel day={cell!.day} />}
     </div>
   );
 
   const grid = (
     <div>
-      {visibleRows.map((row, rowIndex) => (
+      {rows.map((row, rowIndex) => (
         <div
           key={rowIndex}
           className="grid grid-cols-7 border-b last:border-b-0"
         >
-          {row.map((day, dayIndex) => (
-            <Cell day={day} key={dayIndex} />
+          {row.map((cell, cellIndex) => (
+            <Cell cell={cell} key={cellIndex} />
           ))}
         </div>
       ))}
@@ -214,7 +208,7 @@ const Calendar: React.FC<CalendarProps> = ({
 
   return (
     <div className="rounded-lg shadow-lg bg-white overflow-hidden inline-block">
-      <div onClick={() => handleClick(null)}>
+      <div onClick={() => handleClickOutsideGrid()}>
         {calendarHeader}
         {daysOfWeekHeader}
       </div>
