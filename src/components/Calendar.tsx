@@ -1,3 +1,4 @@
+import { isSameDay } from "date-fns";
 import { useEffect, useState } from "react";
 
 type CalendarCell = number | null;
@@ -7,11 +8,13 @@ interface CalendarProps {
   initialDate?: Date;
   // Optional callback for when this calendar is clicked
   onClick?: (day: Date | null) => void;
+  datesToHighlight?: Date[];
 }
 
 const Calendar: React.FC<CalendarProps> = ({
   initialDate = new Date(),
   onClick,
+  datesToHighlight,
 }) => {
   // State to track the current viewed month and year
   const [currentDate, setCurrentDate] = useState(initialDate);
@@ -159,10 +162,40 @@ const Calendar: React.FC<CalendarProps> = ({
   );
 
   const today = new Date();
-  const isToday = (day: number) =>
-    year === today.getFullYear() &&
-    month === today.getMonth() &&
-    day === today.getDate();
+  const isToday = (day: number) => isSameDay(today, new Date(year, month, day));
+  const CellLabel = ({ day }: { day: number }) => (
+    <div
+      className={`${
+        isToday(day)
+          ? "h-8 w-8 rounded-full bg-blue-500 text-white flex items-center justify-center"
+          : "text-gray-700"
+      }`}
+    >
+      {day}
+    </div>
+  );
+
+  const shouldHighlight = (day: number) =>
+    datesToHighlight?.some((dateToHighlight) =>
+      isSameDay(dateToHighlight, new Date(year, month, day))
+    );
+
+  const Cell = ({ day }: { day: number | null }) => (
+    <div
+      className={`
+        p-2 w-16 h-16 border-r last:border-r-0 relative 
+        ${
+          day === null
+            ? "bg-gray-50"
+            : shouldHighlight(day)
+            ? "bg-blue-100 hover:bg-blue-200 cursor-pointer"
+            : "bg-white hover:bg-gray-100 cursor-pointer"
+        }`}
+      onClick={() => handleClick(day)}
+    >
+      {day && <CellLabel day={day} />}
+    </div>
+  );
 
   const grid = (
     <div>
@@ -172,29 +205,7 @@ const Calendar: React.FC<CalendarProps> = ({
           className="grid grid-cols-7 border-b last:border-b-0"
         >
           {row.map((day, dayIndex) => (
-            <div
-              key={dayIndex}
-              className={`
-                p-2 w-16 h-16 border-r last:border-r-0 relative 
-                ${
-                  day
-                    ? "bg-white hover:bg-gray-100 cursor-pointer"
-                    : "bg-gray-50"
-                }`}
-              onClick={() => handleClick(day)}
-            >
-              {day && (
-                <div
-                  className={`${
-                    isToday(day)
-                      ? "h-8 w-8 rounded-full bg-blue-500 text-white flex items-center justify-center"
-                      : "text-gray-700"
-                  }`}
-                >
-                  {day}
-                </div>
-              )}
-            </div>
+            <Cell day={day} key={dayIndex} />
           ))}
         </div>
       ))}
