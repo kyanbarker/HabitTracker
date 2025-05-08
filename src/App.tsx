@@ -20,9 +20,11 @@ function App() {
   return (
     <div className="p-8">
       <Calendar
-        initialDate={new Date(2025, 4)}
+        initialViewDate={new Date(2025, 4)}
         onClick={(day) => setSelectedDay(day)}
         datesToHighlight={engagements}
+        startDate={new Date(2025, 0, 11)}
+        endDate={new Date(2026, 0, 2)}
       />
       <h2>{selectedDay?.toDateString()}</h2>
       <h2>

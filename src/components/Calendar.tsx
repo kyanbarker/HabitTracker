@@ -1,5 +1,6 @@
-import { isSameDay } from "date-fns";
+import { isAfter, isBefore, isSameDay, isSameMonth } from "date-fns";
 import { useEffect, useState } from "react";
+import { isBetween } from "../util/date-util";
 
 type CalendarCell = { day: number } | null;
 type CalendarRow = CalendarCell[];
@@ -9,32 +10,34 @@ const isEmptyCell = (cell: CalendarCell) => cell === EMPTY_CELL;
 const isDayCell = (cell: CalendarCell) => cell !== EMPTY_CELL;
 
 interface CalendarProps {
-  initialDate?: Date;
+  initialViewDate?: Date;
   // Optional callback for when this calendar is clicked
   onClick?: (day: Date | null) => void;
   datesToHighlight?: Date[];
+  startDate?: Date;
+  endDate?: Date;
 }
 
 const Calendar: React.FC<CalendarProps> = ({
-  initialDate = new Date(),
+  initialViewDate = new Date(),
   onClick,
   datesToHighlight,
+  startDate,
+  endDate,
 }) => {
-  // State to track the current viewed month and year
-  const [currentDate, setCurrentDate] = useState(initialDate);
+  const [viewDate, setViewDate] = useState(initialViewDate);
 
-  const month = currentDate.getMonth();
-  const year = currentDate.getFullYear();
+  const month = viewDate.getMonth();
+  const year = viewDate.getFullYear();
 
   const [calendarCells, setCalendarCells] = useState<CalendarCell[]>([]);
 
-  // Navigation functions
   const goToPreviousMonth = () => {
-    setCurrentDate(new Date(year, month - 1, 1));
+    setViewDate(new Date(year, month - 1, 1));
   };
 
   const goToNextMonth = () => {
-    setCurrentDate(new Date(year, month + 1, 1));
+    setViewDate(new Date(year, month + 1, 1));
   };
 
   useEffect(() => {
@@ -47,16 +50,33 @@ const Calendar: React.FC<CalendarProps> = ({
     const calendarCells: CalendarCell[] = [];
 
     // Add empty cells for days before the first day of the month
-    for (let i = 0; i < firstDayOfMonth; i++) calendarCells.push(EMPTY_CELL);
+    for (let i = 0; i < firstDayOfMonth; i++) {
+      calendarCells.push(EMPTY_CELL);
+    }
 
     // Add days of the month
-    for (let day = 1; day <= numDaysInMonth; day++) calendarCells.push({ day });
+    for (let day = 1; day <= numDaysInMonth; day++) {
+      const date = new Date(year, month, day);
+      if (startDate && endDate) {
+        calendarCells.push(
+          isBetween(date, startDate, endDate) ? { day } : EMPTY_CELL
+        );
+      } else if (startDate && !endDate) {
+        calendarCells.push(!isBefore(date, startDate) ? { day } : EMPTY_CELL);
+      } else if (!startDate && endDate) {
+        calendarCells.push(!isAfter(date, endDate) ? { day } : EMPTY_CELL);
+      } else {
+        calendarCells.push({ day });
+      }
+    }
 
     // Add empty cells to fill the last row of the grid
-    while (calendarCells.length % 7 !== 0) calendarCells.push(EMPTY_CELL);
+    while (calendarCells.length % 7 !== 0) {
+      calendarCells.push(EMPTY_CELL);
+    }
 
     setCalendarCells(calendarCells);
-  }, [year, month]); // Now this will re-run whenever the month or year changes
+  }, [year, month, startDate, endDate]);
 
   const rows: CalendarRow[] = [];
   for (let i = 0; i < calendarCells.length; i += 7) {
@@ -128,16 +148,25 @@ const Calendar: React.FC<CalendarProps> = ({
     </button>
   );
 
+  const shouldShowPreviousMonthButton =
+    !startDate || !isSameMonth(viewDate, startDate);
+
+  const shouldShowNextMonthButton = !endDate || !isSameMonth(viewDate, endDate);
+
   const calendarHeader = (
     <div className="bg-blue-600 text-white p-4 flex justify-between items-center">
-      {previousMonthButton}
+      {shouldShowPreviousMonthButton ? (
+        previousMonthButton
+      ) : (
+        <div className="w-6" />
+      )}
       <h2 className="font-bold text-xl">
-        {currentDate.toLocaleDateString("en-US", {
+        {viewDate.toLocaleDateString("en-US", {
           month: "long",
           year: "numeric",
         })}
       </h2>
-      {nextMonthButton}
+      {shouldShowNextMonthButton ? nextMonthButton : <div className="w-6" />}
     </div>
   );
 
