@@ -10,11 +10,28 @@ const isEmptyCell = (cell: CalendarCell) => cell === EMPTY_CELL;
 const isDayCell = (cell: CalendarCell) => cell !== EMPTY_CELL;
 
 interface CalendarProps {
+  /**
+   * A date whose month and year should be displayed when the calendar is first rendered.
+   * The day of the month is ignored.
+   * Defaults to the current month and year.
+   */
   initialViewDate?: Date;
-  // Optional callback for when this calendar is clicked
-  onClick?: (day: Date | null) => void;
+  /**
+   * A callback function to invoke when this calendar is clicked.
+   * @param date - The date that was clicked on this calendar if a date was clicked, null otherwise.
+   */
+  onClick?: (date: Date | null) => void;
+  /**
+   * An array of dates to highlight in this calendar.
+   */
   datesToHighlight?: Date[];
+  /**
+   * The minimum date to display in this calendar.
+   */
   startDate?: Date;
+  /**
+   * The maximum date to display in this calendar.
+   */
   endDate?: Date;
 }
 
@@ -40,6 +57,7 @@ const Calendar: React.FC<CalendarProps> = ({
     setViewDate(new Date(year, month + 1, 1));
   };
 
+  // Sets `calendarCells` after initial rendering and when dependencies change
   useEffect(() => {
     // Calculate num days in month (i.e. the day of the month of the last day of the month)
     const numDaysInMonth = new Date(year, month + 1, 0).getDate();
@@ -54,17 +72,18 @@ const Calendar: React.FC<CalendarProps> = ({
       calendarCells.push(EMPTY_CELL);
     }
 
-    // Add days of the month
+    // Add cells for days of the month
     for (let day = 1; day <= numDaysInMonth; day++) {
       const date = new Date(year, month, day);
       if (startDate && endDate) {
-        calendarCells.push(
-          isBetween(date, startDate, endDate) ? { day } : EMPTY_CELL
-        );
+        const cell = isBetween(date, startDate, endDate) ? { day } : EMPTY_CELL;
+        calendarCells.push(cell);
       } else if (startDate && !endDate) {
-        calendarCells.push(!isBefore(date, startDate) ? { day } : EMPTY_CELL);
+        const cell = !isBefore(date, startDate) ? { day } : EMPTY_CELL;
+        calendarCells.push(cell);
       } else if (!startDate && endDate) {
-        calendarCells.push(!isAfter(date, endDate) ? { day } : EMPTY_CELL);
+        const cell = !isAfter(date, endDate) ? { day } : EMPTY_CELL;
+        calendarCells.push(cell);
       } else {
         calendarCells.push({ day });
       }
