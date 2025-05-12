@@ -1,105 +1,84 @@
-import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
-import { PickersDay } from "@mui/x-date-pickers/PickersDay";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { Box } from "@mui/material";
 import Badge from "@mui/material/Badge";
+import { blue } from "@mui/material/colors";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { PickersDay } from "@mui/x-date-pickers/PickersDay";
 import { isSameDay } from "date-fns";
 import { useEffect, useRef } from "react";
 
-// Define the props for our component without generic type parameters
 interface HighlightedDateCalendarProps
   extends Omit<React.ComponentProps<typeof DateCalendar>, "slots"> {
   highlightedDates: Date[];
-  slots?: Omit<React.ComponentProps<typeof DateCalendar>["slots"], "day"> & {
-    day?: React.ComponentType<React.ComponentProps<typeof PickersDay>>;
-  };
   onOutsideClick?: () => void;
 }
 
 const HighlightedDateCalendar: React.FC<HighlightedDateCalendarProps> = ({
   highlightedDates,
-  slots: userSlots,
   onOutsideClick,
-  ...otherProps
+  ...props
 }) => {
-  // Create a reference to track the calendar element
-  const calendarRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Add click outside detection
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        calendarRef.current &&
-        !calendarRef.current.contains(event.target as Node)
-      ) {
+    const handleClick = (event: MouseEvent) => {
+      const isClickOutside =
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node);
+
+      if (isClickOutside) {
         onOutsideClick?.();
       }
     };
-
-    // Add event listener
-    document.addEventListener("mousedown", handleClickOutside);
-
-    // Clean up
+    document.addEventListener("mousedown", handleClick);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("mousedown", handleClick);
     };
   }, [onOutsideClick]);
 
-  // Get the user's custom day component or fall back to PickersDay
-  const UserDayComponent = userSlots?.day || PickersDay;
+  const HighlightedDay = (
+    pickersDayProps: React.ComponentProps<typeof PickersDay>
+  ) => {
+    const { day, outsideCurrentMonth, ...other } = pickersDayProps;
 
-  // Create a day component that adds highlighting
-  const HighlightedDay = (props: React.ComponentProps<typeof PickersDay>) => {
-    const { day, outsideCurrentMonth, ...other } = props;
-
-    // Check if the current day should be highlighted
-    const isHighlighted =
+    const shouldHighlight =
       !outsideCurrentMonth &&
       highlightedDates.some((date) => isSameDay(date, day));
 
-    // If highlighted, wrap in Badge, otherwise just render the day component
-    return isHighlighted ? (
-      <Badge
-        key={day.toString()}
-        overlap="circular"
-        // badgeContent="1"
-        color="primary"
-      >
-        <UserDayComponent
+    return shouldHighlight ? (
+      <Badge key={day.toString()}>
+        <PickersDay
           day={day}
           outsideCurrentMonth={outsideCurrentMonth}
           {...other}
           sx={{
-            ...(isHighlighted
-              ? {
-                  backgroundColor: "primary.light",
-                  color: "primary.contrastText",
-                  "&:hover": {
-                    backgroundColor: "primary.main",
-                  },
-                }
-              : {}),
-            ...(props.sx || {}),
+            backgroundColor: blue[400],
+            color: "white",
+            "&:hover": {
+              backgroundColor: blue[400], // Override the default hover effect
+            },
+            ...(pickersDayProps.sx || {}),
           }}
         />
       </Badge>
     ) : (
-      <UserDayComponent {...props} />
+      <PickersDay {...pickersDayProps} />
     );
   };
 
   return (
-    <div ref={calendarRef} className="w-min">
+    <Box ref={containerRef} sx={{ width: "min-content" }}>
       <LocalizationProvider dateAdapter={AdapterDateFns}>
         <DateCalendar
-          {...otherProps}
+          {...props}
           slots={{
-            ...(userSlots || {}),
             day: HighlightedDay,
           }}
         />
       </LocalizationProvider>
-    </div>
+    </Box>
   );
 };
 

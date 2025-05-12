@@ -1,5 +1,7 @@
+import { Box } from "@mui/material";
 import { differenceInDays, max } from "date-fns";
 import { useState } from "react";
+import EditableTable from "./components/EditableTable";
 import HighlightedDateCalendar from "./components/HighlightedDateCalendar";
 
 function App() {
@@ -12,28 +14,27 @@ function App() {
     new Date(2025, 3, 18),
     new Date(2025, 3, 20),
   ];
-  const habits = ["Excercise", "Meditation", "Reading", "Drinking"]
+  const habits = [
+    "Excercise (minutes)",
+    "Meditation (minutes)",
+    "Reading (minutes)",
+    "# Drinks",
+  ];
   const lastEngagement = max(engagements);
   const numDaysSinceLastEngagement = differenceInDays(
     new Date(),
     lastEngagement
   );
 
-  // Handler for clicks outside the calendar
-  const handleOutsideClick = () => {
-    setSelectedDate(null);
-  };
-
   return (
-    <div className="p-8">
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 2, padding: 2 }}>
       <HighlightedDateCalendar
         highlightedDates={engagements}
-        defaultValue={new Date()}
         value={selectedDate}
         onChange={(value) => setSelectedDate(value)}
         minDate={new Date(2000, 0, 15)}
         maxDate={new Date()}
-        onOutsideClick={handleOutsideClick}
+        onOutsideClick={() => setSelectedDate(null)}
         views={["year", "month", "day"]}
         disableHighlightToday={true}
         disableFuture={true}
@@ -43,7 +44,10 @@ function App() {
         Last Engagement: {lastEngagement.toDateString()} (
         {numDaysSinceLastEngagement} Days Ago)
       </h2>
-    </div>
+      <Box sx={{ height: "400px", width: "800px", overflow: "auto" }}>
+        <EditableTable />
+      </Box>
+    </Box>
   );
 }
 
