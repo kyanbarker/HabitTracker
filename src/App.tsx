@@ -3,6 +3,7 @@ import { differenceInDays, max } from "date-fns";
 import { useState } from "react";
 import EditableTable from "./components/EditableTable";
 import HighlightedDateCalendar from "./components/HighlightedDateCalendar";
+import ClickController from "./components/ClickController";
 
 function App() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -28,17 +29,18 @@ function App() {
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2, padding: 2 }}>
-      <HighlightedDateCalendar
-        highlightedDates={engagements}
-        value={selectedDate}
-        onChange={(value) => setSelectedDate(value)}
-        minDate={new Date(2000, 0, 15)}
-        maxDate={new Date()}
-        onOutsideClick={() => setSelectedDate(null)}
-        views={["year", "month", "day"]}
-        disableHighlightToday={true}
-        disableFuture={true}
-      />
+      <ClickController onOutsideClick={() => setSelectedDate(null)}>
+        <HighlightedDateCalendar
+          highlightedDates={engagements}
+          value={selectedDate}
+          onChange={(value) => setSelectedDate(value)}
+          minDate={new Date(2000, 0, 15)}
+          maxDate={new Date()}
+          views={["year", "month", "day"]}
+          disableHighlightToday={true}
+          disableFuture={true}
+        />
+      </ClickController>
       <h2>{selectedDate?.toDateString() || "No date selected"}</h2>
       <h2>
         Last Engagement: {lastEngagement.toDateString()} (
