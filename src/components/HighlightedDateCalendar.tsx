@@ -55,13 +55,13 @@ const DefaultHighlightedDateComponent: React.FC<
  * @param highlightedDates - the list of dates to highlight in this calendar
  * @param highlightedDateComponent - optional custom component for highlighted dates
  */
-interface HighlightedDateCalendarProps
+interface HighlightedCalendarProps
   extends Omit<React.ComponentProps<typeof DateCalendar>, "slots"> {
   highlightedDates: Date[];
   HighlightedDateComponent?: React.FC<HighlightedDateComponentProps>;
 }
 
-const HighlightedDateCalendar: React.FC<HighlightedDateCalendarProps> = ({
+const HighlightedCalendar: React.FC<HighlightedCalendarProps> = ({
   highlightedDates,
   HighlightedDateComponent,
   ...props
@@ -89,4 +89,4 @@ const HighlightedDateCalendar: React.FC<HighlightedDateCalendarProps> = ({
   );
 };
 
-export default HighlightedDateCalendar;
+export default HighlightedCalendar;

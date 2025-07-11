@@ -2,7 +2,7 @@ import { Box } from "@mui/material";
 import { differenceInDays, max } from "date-fns";
 import { useState } from "react";
 import EditableTable from "./components/EditableTable";
-import HighlightedDateCalendar from "./components/HighlightedDateCalendar";
+import HighlightedCalendar from "./components/HighlightedDateCalendar";
 import ClickController from "./components/ClickController";
 
 function App() {
@@ -30,7 +30,7 @@ function App() {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2, padding: 2 }}>
       <ClickController onOutsideClick={() => setSelectedDate(null)}>
-        <HighlightedDateCalendar
+        <HighlightedCalendar
           highlightedDates={engagements}
           value={selectedDate}
           onChange={(value) => setSelectedDate(value)}
