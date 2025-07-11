@@ -2,7 +2,7 @@ import { Box } from "@mui/material";
 import { differenceInDays, max } from "date-fns";
 import { useState } from "react";
 import EditableTable from "./components/EditableTable";
-import HighlightedCalendar from "./components/HighlightedDateCalendar";
+import HighlightedCalendar from "./components/HighlightedCalendar";
 import ClickController from "./components/ClickController";
 
 function App() {

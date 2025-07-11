@@ -37,7 +37,7 @@ const DefaultHighlightedDateComponent: React.FC<
           "&:hover": {
             backgroundColor: blue[400], // Nullify the default hover effect
           },
-          ...(sx || {}),
+          ...(sx || {}), // Preserve any additional styles passed in
         }}
       />
     </Badge>
@@ -47,9 +47,9 @@ const DefaultHighlightedDateComponent: React.FC<
 };
 
 /**
- * `HighlightedDateCalendarProps` extends `DateCalendarProps`
+ * `HighlightedCalendarProps` extends `DateCalendarProps`
  * but omits the `slots` property from `DateCalendarProps`,
- * since `HighlightedDateCalendar` is simply a `DateCalendar` with a value for `slots` supplied;
+ * since `HighlightedCalendar` is simply a `DateCalendar` with a value for `slots` supplied;
  * hence, it would not make since for the client to specify a value for `slots`.
  *
  * @param highlightedDates - the list of dates to highlight in this calendar
@@ -65,28 +65,26 @@ const HighlightedCalendar: React.FC<HighlightedCalendarProps> = ({
   highlightedDates,
   HighlightedDateComponent,
   ...props
-}) => {
-  return (
-    <LocalizationProvider dateAdapter={AdapterDateFns}>
-      <DateCalendar
-        {...props}
-        slots={{
-          day: (pickersDayProps: React.ComponentProps<typeof PickersDay>) =>
-            HighlightedDateComponent ? (
-              <HighlightedDateComponent
-                {...pickersDayProps}
-                highlightedDates={highlightedDates}
-              />
-            ) : (
-              <DefaultHighlightedDateComponent
-                {...pickersDayProps}
-                highlightedDates={highlightedDates}
-              />
-            ),
-        }}
-      />
-    </LocalizationProvider>
-  );
-};
+}) => (
+  <LocalizationProvider dateAdapter={AdapterDateFns}>
+    <DateCalendar
+      {...props}
+      slots={{
+        day: (pickersDayProps: React.ComponentProps<typeof PickersDay>) =>
+          HighlightedDateComponent ? (
+            <HighlightedDateComponent
+              {...pickersDayProps}
+              highlightedDates={highlightedDates}
+            />
+          ) : (
+            <DefaultHighlightedDateComponent
+              {...pickersDayProps}
+              highlightedDates={highlightedDates}
+            />
+          ),
+      }}
+    />
+  </LocalizationProvider>
+);
 
 export default HighlightedCalendar;
