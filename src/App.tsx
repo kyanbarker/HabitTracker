@@ -7,7 +7,8 @@ import ClickController from "./components/ClickController";
 
 function App() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const engagements = [
+
+  const engagementDates = [
     new Date(2025, 4, 3),
     new Date(2025, 4, 1),
     new Date(2025, 3, 16),
@@ -15,23 +16,24 @@ function App() {
     new Date(2025, 3, 18),
     new Date(2025, 3, 20),
   ];
-  const habits = [
-    "Excercise (minutes)",
-    "Meditation (minutes)",
-    "Reading (minutes)",
-    "# Drinks",
-  ];
-  const lastEngagement = max(engagements);
+  const lastEngagement = max(engagementDates);
   const numDaysSinceLastEngagement = differenceInDays(
     new Date(),
     lastEngagement
   );
 
+  const [rows, setRows] = useState([
+    ["habit", "value", "unit", "notes"],
+    ["reading", "10", "pages", ""],
+    ["mood", "7", "out of 10", ""],
+    ["exercise", "30", "minutes", "running"],
+  ]);
+
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2, padding: 2 }}>
       <ClickController onOutsideClick={() => setSelectedDate(null)}>
         <HighlightedCalendar
-          highlightedDates={engagements}
+          highlightedDates={engagementDates}
           value={selectedDate}
           onChange={(value) => setSelectedDate(value)}
           minDate={new Date(2000, 0, 15)}
@@ -47,7 +49,15 @@ function App() {
         {numDaysSinceLastEngagement} Days Ago)
       </h2>
       <Box sx={{ height: "400px", width: "800px", overflow: "auto" }}>
-        <EditableTable />
+        <EditableTable
+          rows={rows}
+          setRows={setRows}
+          columnConfig={[
+            { isLocked: true },
+            { type: "number" },
+            { isLocked: true },
+          ]}
+        />
       </Box>
     </Box>
   );

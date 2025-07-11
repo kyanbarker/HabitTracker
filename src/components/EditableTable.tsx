@@ -6,37 +6,44 @@ import {
   TableHead,
   TableRow,
   TextField,
+  Select,
+  MenuItem,
 } from "@mui/material";
-import Typography from "@mui/material/Typography";
-import React, { useState } from "react";
+import React from "react";
 
-interface Row {
-  index: number;
-  name: string;
-  value: string;
-  notes: string;
+interface ColumnConfig {
+  type?: "text" | "number" | "select";
+  isLocked?: boolean;
+  options?: string[];
 }
 
-const initialRows: Row[] = Array.from(
-  { length: 20 },
-  (_, index) =>
-    ({
-      index: index,
-      name: `Name ${index}`,
-      value: `${index}`,
-      notes: `Notes ${index}`,
-    } as Row)
-);
+interface EditableTableProps {
+  rows: string[][];
+  setRows: React.Dispatch<React.SetStateAction<string[][]>>;
+  columnConfig?: ColumnConfig[];
+}
 
-const EditableTable: React.FC = () => {
-  const [rows, setRows] = useState<Row[]>(initialRows);
+const EditableTable: React.FC<EditableTableProps> = ({
+  rows,
+  setRows,
+  columnConfig = [],
+}) => {
+  if (rows.length === 0) return null;
 
-  const handleCellEdit = (index: number, field: keyof Row, value: string) => {
-    setRows((prevRows) =>
-      prevRows.map((row) =>
-        row.index === index ? { ...row, [field]: value } : row
-      )
-    );
+  const headers = rows[0];
+  const dataRows = rows.slice(1);
+
+  const handleCellChange = (
+    rowIndex: number,
+    colIndex: number,
+    value: string
+  ) => {
+    setRows((prevRows) => {
+      const newRows = [...prevRows];
+      newRows[rowIndex + 1] = [...newRows[rowIndex + 1]];
+      newRows[rowIndex + 1][colIndex] = value;
+      return newRows;
+    });
   };
 
   return (
@@ -44,36 +51,54 @@ const EditableTable: React.FC = () => {
       <Table stickyHeader>
         <TableHead>
           <TableRow>
-            <TableCell>Habit</TableCell>
-            <TableCell></TableCell>
-            <TableCell>Notes</TableCell>
+            {headers.map((header, index) => (
+              <TableCell key={index}>{header}</TableCell>
+            ))}
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map((row) => (
-            <TableRow key={row.index}>
-              <TableCell>{row.name}</TableCell>
-              <TableCell sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                <TextField
-                  variant="standard"
-                  type="number"
-                  value={row.value}
-                  onChange={(e) =>
-                    handleCellEdit(row.index, "value", e.target.value)
-                  }
-                  sx={{ width: "60px" }}
-                />
-                <Typography>minutes</Typography>
-              </TableCell>
-              <TableCell>
-                <TextField
-                  variant="standard"
-                  value={row.notes}
-                  onChange={(e) =>
-                    handleCellEdit(row.index, "notes", e.target.value)
-                  }
-                />
-              </TableCell>
+          {dataRows.map((row, rowIndex) => (
+            <TableRow key={rowIndex}>
+              {row.map((value, colIndex) => {
+                const config = columnConfig[colIndex] || {};
+
+                let cellComponent = null;
+
+                if (config.isLocked) {
+                  cellComponent = value;
+                } else if (config.type === "select" && config.options) {
+                  cellComponent = (
+                    <Select
+                      variant="standard"
+                      value={value}
+                      onChange={(e) =>
+                        handleCellChange(rowIndex, colIndex, e.target.value)
+                      }
+                      fullWidth
+                    >
+                      {config.options.map((option) => (
+                        <MenuItem key={option} value={option}>
+                          {option}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  );
+                } else {
+                  cellComponent = (
+                    <TextField
+                      variant="standard"
+                      type={config.type || "text"}
+                      value={value}
+                      onChange={(e) =>
+                        handleCellChange(rowIndex, colIndex, e.target.value)
+                      }
+                      fullWidth
+                    />
+                  );
+                }
+
+                return <TableCell key={colIndex}>{cellComponent}</TableCell>;
+              })}
             </TableRow>
           ))}
         </TableBody>
