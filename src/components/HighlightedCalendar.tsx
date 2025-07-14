@@ -8,14 +8,19 @@ import { isSameDay } from "date-fns";
 import React from "react";
 
 /**
- * Props for a highlighted date component.
- * Used for custom rendering of highlighted dates.
+ * `HighlightedDateComponentProps` extends `PickersDayProps`
+ * since a `HighlightedDateComponent` is simply a `PickersDay`
+ * 
+ * - `highlightedDates` - the list of dates to highlight in the calendar
  */
 interface HighlightedDateComponentProps
   extends React.ComponentProps<typeof PickersDay> {
   highlightedDates: Date[];
 }
 
+/**
+ * The highlighted date component to use if no highlighted date component prop is supplied for the highlighted calendar
+ */
 const DefaultHighlightedDateComponent: React.FC<
   HighlightedDateComponentProps
 > = ({ highlightedDates, ...pickersDayProps }) => {
@@ -52,8 +57,8 @@ const DefaultHighlightedDateComponent: React.FC<
  * since `HighlightedCalendar` is simply a `DateCalendar` with a value for `slots` supplied;
  * hence, it would not make since for the client to specify a value for `slots`.
  *
- * @param highlightedDates - the list of dates to highlight in this calendar
- * @param highlightedDateComponent - optional custom component for highlighted dates
+ * - `highlightedDates` - the list of dates to highlight in this calendar
+ * - `highlightedDateComponent` - optional custom component for highlighted dates
  */
 interface HighlightedCalendarProps
   extends Omit<React.ComponentProps<typeof DateCalendar>, "slots"> {
