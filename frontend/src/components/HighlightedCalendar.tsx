@@ -8,48 +8,27 @@ import { isSameDay } from "date-fns";
 import React from "react";
 
 /**
- * `HighlightedDateComponentProps` extends `PickersDayProps`
- * since a `HighlightedDateComponent` is simply a `PickersDay`
- * 
- * - `highlightedDates` - the list of dates to highlight in the calendar
- */
-interface HighlightedDateComponentProps
-  extends React.ComponentProps<typeof PickersDay> {
-  highlightedDates: Date[];
-}
-
-/**
  * The highlighted date component to use if no highlighted date component prop is supplied for the highlighted calendar
  */
 const DefaultHighlightedDateComponent: React.FC<
-  HighlightedDateComponentProps
-> = ({ highlightedDates, ...pickersDayProps }) => {
-  const { day, outsideCurrentMonth, sx, ...other } = pickersDayProps;
-
-  const shouldHighlight =
-    !outsideCurrentMonth &&
-    highlightedDates.some((date) => isSameDay(date, day));
-
-  return shouldHighlight ? (
-    <Badge key={day.toString()}>
-      <PickersDay
-        day={day}
-        outsideCurrentMonth={outsideCurrentMonth}
-        {...other}
-        sx={{
-          backgroundColor: blue[400],
-          color: "white",
-          "&:hover": {
-            backgroundColor: blue[400], // Nullify the default hover effect
-          },
-          ...(sx || {}), // Preserve any additional styles passed in
-        }}
-      />
-    </Badge>
-  ) : (
-    <PickersDay {...pickersDayProps} />
-  );
-};
+  React.ComponentProps<typeof PickersDay>
+> = ({ day, outsideCurrentMonth, sx, ...other }) => (
+  <Badge key={day.toString()}>
+    <PickersDay
+      day={day}
+      outsideCurrentMonth={outsideCurrentMonth}
+      {...other}
+      sx={{
+        backgroundColor: blue[400],
+        color: "white",
+        "&:hover": {
+          backgroundColor: blue[400], // Nullify the default hover effect
+        },
+        ...(sx || {}), // Preserve any additional styles passed in
+      }}
+    />
+  </Badge>
+);
 
 /**
  * `HighlightedCalendarProps` extends `DateCalendarProps`
@@ -63,7 +42,7 @@ const DefaultHighlightedDateComponent: React.FC<
 interface HighlightedCalendarProps
   extends Omit<React.ComponentProps<typeof DateCalendar>, "slots"> {
   highlightedDates: Date[];
-  HighlightedDateComponent?: React.FC<HighlightedDateComponentProps>;
+  HighlightedDateComponent?: React.FC<React.ComponentProps<typeof PickersDay>>;
 }
 
 const HighlightedCalendar: React.FC<HighlightedCalendarProps> = ({
@@ -75,18 +54,20 @@ const HighlightedCalendar: React.FC<HighlightedCalendarProps> = ({
     <DateCalendar
       {...props}
       slots={{
-        day: (pickersDayProps: React.ComponentProps<typeof PickersDay>) =>
-          HighlightedDateComponent ? (
-            <HighlightedDateComponent
-              {...pickersDayProps}
-              highlightedDates={highlightedDates}
-            />
-          ) : (
-            <DefaultHighlightedDateComponent
-              {...pickersDayProps}
-              highlightedDates={highlightedDates}
-            />
-          ),
+        day: (pickersDayProps: React.ComponentProps<typeof PickersDay>) => {
+          const { day, outsideCurrentMonth } = pickersDayProps;
+          const shouldHighlight =
+            !outsideCurrentMonth &&
+            highlightedDates.some((date) => isSameDay(date, day));
+
+          if (!shouldHighlight) {
+            return <PickersDay {...pickersDayProps} />;
+          }
+          if (HighlightedDateComponent) {
+            return <HighlightedDateComponent {...pickersDayProps} />;
+          }
+          return <DefaultHighlightedDateComponent {...pickersDayProps} />;
+        },
       }}
     />
   </LocalizationProvider>
