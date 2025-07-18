@@ -53,7 +53,7 @@ const EventForm = ({ onSubmit }: EventFormProps) => {
         name="units"
         value={form.units}
         onChange={handleFormChange}
-        required
+        // required
       />
       <TextField
         label="Date"
