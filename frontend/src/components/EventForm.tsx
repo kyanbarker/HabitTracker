@@ -61,8 +61,7 @@ export const EventForm = ({ onSubmit }: EventFormProps) => {
         type="date"
         value={form.date}
         onChange={handleFormChange}
-        InputLabelProps={{ shrink: true }}
-        required
+        slotProps={{ inputLabel: { shrink: true } }}
       />
       <TextField
         label="Notes"
