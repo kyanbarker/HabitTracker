@@ -116,10 +116,10 @@ docker-compose up --build -d
 │   └── prisma_client/        # Generated Prisma client
 ├── dist/                     # Compiled TypeScript output
 ├── docker-compose.yml        # Main Docker orchestration
-├── Dockerfile               # Container build instructions
-├── .env.prod                # Production environment variables
-├── tsconfig.json            # TypeScript configuration
-└── package.json             # Dependencies and scripts
+├── Dockerfile                # Container build instructions
+├── .env                      # Environment variables
+├── tsconfig.json             # TypeScript configuration
+└── package.json              # Dependencies and scripts
 ```
 
 ---
