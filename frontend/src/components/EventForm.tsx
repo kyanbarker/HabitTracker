@@ -22,9 +22,16 @@ const EventForm = ({ onSubmit }: EventFormProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      onSubmit({...form, date: form.date ? new Date(form.date) : new Date()});
-    } catch (err) {
-      console.error("Failed to add event:", err);
+      onSubmit({ ...form, date: form.date ? new Date(form.date) : new Date() });
+      setForm({
+        series: "",
+        value: "",
+        units: "",
+        date: "",
+        notes: "",
+      }); // Reset form after submission
+    } catch (error) {
+      console.error("Failed to add event:", error);
     }
   };
 

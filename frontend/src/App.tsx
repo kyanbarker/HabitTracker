@@ -32,9 +32,9 @@ const App = () => {
     }
   };
 
-  const handleDeleteEvent = async (event: Event) => {
+  const handleDeleteEvent = async (event: Event & { id: number }) => {
     try {
-      await deleteEvent(event);
+      await deleteEvent(event.id);
       setRefresh((x) => x + 1); // Trigger useEffect to refetch events
     } catch (error) {
       console.error("Failed to delete event:", error);
@@ -100,8 +100,8 @@ async function addEvent(event: Event) {
   }
 }
 
-async function deleteEvent(event: Event) {
-  const res = await fetch(`http://localhost:3001/events/${event.id}`, {
+async function deleteEvent(id: number) {
+  const res = await fetch(`http://localhost:3001/events/${id}`, {
     method: "DELETE",
   });
   if (!res.ok) {
