@@ -1,13 +1,13 @@
 import { Box, Typography, List, ListItem, Button } from "@mui/material";
 import { Event } from "../types/event";
 
-export interface EventsViewProps {
+interface EventsViewProps {
   date: Date;
   events: Event[];
   onDelete: (event: Event) => void;
 }
 
-export const EventsView = ({ date, events, onDelete }: EventsViewProps) => (
+const EventsView = ({ date, events, onDelete }: EventsViewProps) => (
   <Box sx={{ marginTop: 2 }}>
     <Typography variant="h6">Selected Date: {date.toLocaleDateString()}</Typography>
     <List>
@@ -31,3 +31,5 @@ export const EventsView = ({ date, events, onDelete }: EventsViewProps) => (
     </List>
   </Box>
 );
+
+export default EventsView;

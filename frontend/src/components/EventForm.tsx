@@ -6,7 +6,7 @@ interface EventFormProps {
   onSubmit: (event: Event) => void;
 }
 
-export const EventForm = ({ onSubmit }: EventFormProps) => {
+const EventForm = ({ onSubmit }: EventFormProps) => {
   const [form, setForm] = useState({
     series: "",
     value: "",
@@ -75,3 +75,5 @@ export const EventForm = ({ onSubmit }: EventFormProps) => {
     </Box>
   );
 };
+
+export default EventForm;

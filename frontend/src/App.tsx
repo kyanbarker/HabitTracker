@@ -1,8 +1,7 @@
 import { Box } from "@mui/material";
 import { useEffect, useState } from "react";
-import ClickController from "./components/ClickController";
-import { EventForm } from "./components/EventForm";
-import { EventsView } from "./components/EventsView";
+import EventForm from "./components/EventForm";
+import EventsView from "./components/EventsView";
 import HighlightedCalendar from "./components/HighlightedCalendar";
 import { Event } from "./types/event";
 
@@ -37,11 +36,10 @@ const App = () => {
     try {
       await deleteEvent(event);
       setRefresh((x) => x + 1); // Trigger useEffect to refetch events
-    }
-    catch (error) {
+    } catch (error) {
       console.error("Failed to delete event:", error);
     }
-  }
+  };
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2, padding: 2 }}>
@@ -51,10 +49,9 @@ const App = () => {
         value={selectedDate}
         onChange={(value) => setSelectedDate(value)}
         minDate={new Date(2000, 0, 15)}
-        maxDate={new Date()}
+        maxDate={new Date(2025, 11, 31)}
         views={["year", "month", "day"]}
         disableHighlightToday={true}
-        disableFuture={true}
       />
       {selectedDate && (
         <EventsView
@@ -72,7 +69,24 @@ async function getEvents(): Promise<(Event & { id: number })[]> {
   if (!res.ok) {
     throw new Error(`Failed to fetch events: ${res}`);
   }
-  return res.json();
+  const events = await res.json();
+  return events.map((event: any) => {
+    // We have to manually parse the date string to a Date object
+    // because we want to disregard the time part.
+    // If we were to convert the entire iso string to a Date object,
+    // there could be errors due to time zone differences.
+    const yearString = event.date.substring(0, 4);
+    const monthString = event.date.substring(5, 7);
+    const dayString = event.date.substring(8, 10);
+    const year = parseInt(yearString, 10);
+    const month = parseInt(monthString, 10) - 1; // Month is 0-indexed in JavaScript
+    const day = parseInt(dayString, 10);
+
+    return {
+      ...event,
+      date: new Date(year, month, day),
+    };
+  }) as (Event & { id: number })[];
 }
 
 async function addEvent(event: Event) {
