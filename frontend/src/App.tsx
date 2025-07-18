@@ -13,7 +13,14 @@ const App = () => {
   useEffect(() => {
     async function fetchEvents() {
       try {
-        setEvents(await getEvents());
+        const fetchedEvents = await getEvents();
+        setEvents(
+          fetchedEvents.sort((a, b) => {
+            if (a.series < b.series) return -1;
+            if (a.series > b.series) return 1;
+            return 0;
+          })
+        );
       } catch (error) {
         console.error("Failed to fetch events:", error);
       }
@@ -41,6 +48,18 @@ const App = () => {
     }
   };
 
+  const handleEditEvent = async (
+    id: number,
+    updateData: Partial<Event>
+  ): Promise<void> => {
+    try {
+      await editEvent(id, updateData);
+      setRefresh((x) => x + 1); // Trigger useEffect to refetch events
+    } catch (error) {
+      console.error("Failed to edit event:", error);
+    }
+  };
+
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2, padding: 2 }}>
       <EventForm onSubmit={handleAddEvent} />
@@ -58,6 +77,7 @@ const App = () => {
           date={selectedDate}
           events={events}
           onDelete={handleDeleteEvent}
+          onEdit={handleEditEvent}
         />
       )}
     </Box>
@@ -106,6 +126,17 @@ async function deleteEvent(id: number) {
   });
   if (!res.ok) {
     throw new Error(`Failed to delete event: ${res}`);
+  }
+}
+
+async function editEvent(id: number, updateData: Partial<Event>) {
+  const res = await fetch(`http://localhost:3001/events/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(updateData),
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to edit event: ${res}`);
   }
 }
 
