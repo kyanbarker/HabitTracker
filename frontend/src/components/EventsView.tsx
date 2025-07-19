@@ -50,7 +50,6 @@ const EventsView = ({ date, events, onDelete, onEdit }: EventsViewProps) => {
             <TableRow>
               <TableCell>Series</TableCell>
               <TableCell>Value</TableCell>
-              <TableCell>Units</TableCell>
               <TableCell>Notes</TableCell>
               <TableCell align="right">Actions</TableCell>
             </TableRow>
@@ -63,7 +62,7 @@ const EventsView = ({ date, events, onDelete, onEdit }: EventsViewProps) => {
               )
               .map((event) => (
                 <TableRow key={event.id}>
-                  <TableCell>{event.series}</TableCell>
+                  <TableCell>{event.series.name}</TableCell>
                   <TableCell>
                     <TextField
                       variant="standard"
@@ -84,7 +83,6 @@ const EventsView = ({ date, events, onDelete, onEdit }: EventsViewProps) => {
                       }
                     />
                   </TableCell>
-                  <TableCell>{event.units}</TableCell>
                   <TableCell>
                     <TextField
                       variant="standard"

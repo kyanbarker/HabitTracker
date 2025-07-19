@@ -23,21 +23,79 @@ async function handleError(
   }
 }
 
+// ============================================================================
+// series
+// ============================================================================
+
+app.get("/series", async (req: Request, res: Response) => {
+  handleError(req, res, async () => {
+    const series = await prisma.series.findMany();
+    res.json(series);
+  });
+});
+
+app.post("/series", async (req: Request, res: Response) => {
+  handleError(req, res, async () => {
+    const { name, eventValueOptions, eventValueType } = req.body;
+    const newSeries = await prisma.series.create({
+      data: {
+        name,
+        eventValueOptions,
+        eventValueType,
+      },
+    });
+    res.status(201).json(newSeries);
+  });
+});
+
+app.delete("/series/:id", async (req: Request, res: Response) => {
+  handleError(req, res, async () => {
+    const { id } = req.params;
+    await prisma.series.delete({
+      where: { id: Number(id) },
+    });
+    res.status(204).send();
+  });
+});
+
+app.delete("/series", async (req: Request, res: Response) => {
+  handleError(req, res, async () => {
+    await prisma.series.deleteMany();
+    res.status(204).send();
+  });
+});
+
+app.patch("/series/:id", async (req: Request, res: Response) => {
+  handleError(req, res, async () => {
+    const { id } = req.params;
+    const updateData = req.body; // Contains subset of series properties to update
+
+    const updatedSeries = await prisma.series.update({
+      where: { id: Number(id) },
+      data: updateData,
+    });
+    res.json(updatedSeries);
+  });
+});
+
+// ============================================================================
+// events
+// ============================================================================
+
 app.get("/events", async (req: Request, res: Response) => {
   handleError(req, res, async () => {
-    const events = await prisma.event.findMany();
+    const events = await prisma.event.findMany({ include: { series: true } });
     res.json(events);
   });
 });
 
 app.post("/events", async (req: Request, res: Response) => {
   handleError(req, res, async () => {
-    const { series, value, units, date, notes } = req.body;
+    const { seriesId, value, date, notes } = req.body;
     const newEvent = await prisma.event.create({
       data: {
-        series,
+        seriesId: parseInt(seriesId),
         value,
-        units,
         date: date ? new Date(date) : new Date(),
         notes,
       },

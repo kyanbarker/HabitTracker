@@ -1,8 +1,9 @@
+import { Series } from "./series";
+
 export interface Event {
   id?: number; // Events that have not been created yet won't have an id
-  series: string;
+  series: Series;
   value: string;
-  units: string;
   date: Date;
   notes: string;
 }

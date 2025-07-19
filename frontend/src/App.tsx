@@ -1,6 +1,5 @@
 import { Box } from "@mui/material";
 import { useEffect, useState } from "react";
-import EventForm from "./components/EventForm";
 import EventsView from "./components/EventsView";
 import HighlightedCalendar from "./components/HighlightedCalendar";
 import { Event } from "./types/event";
@@ -16,8 +15,8 @@ const App = () => {
         const fetchedEvents = await getEvents();
         setEvents(
           fetchedEvents.sort((a, b) => {
-            if (a.series < b.series) return -1;
-            if (a.series > b.series) return 1;
+            if (a.series.name < b.series.name) return -1;
+            if (a.series.name > b.series.name) return 1;
             return 0;
           })
         );
@@ -29,15 +28,6 @@ const App = () => {
   }, [refresh]);
 
   const eventDates = events.map((event) => new Date(event.date));
-
-  const handleAddEvent = async (newEvent: Event) => {
-    try {
-      await addEvent(newEvent);
-      setRefresh((x) => x + 1); // Trigger useEffect to refetch events
-    } catch (error) {
-      console.error("Failed to add event:", error);
-    }
-  };
 
   const handleDeleteEvent = async (event: Event & { id: number }) => {
     try {
@@ -62,7 +52,6 @@ const App = () => {
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2, padding: 2 }}>
-      <EventForm onSubmit={handleAddEvent} />
       <HighlightedCalendar
         highlightedDates={eventDates}
         value={selectedDate}
