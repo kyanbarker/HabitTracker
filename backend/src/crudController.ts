@@ -1,13 +1,18 @@
 import { Request, Response } from "express";
 
 interface CrudDelegate {
-  findMany: () => Promise<any[]>;
-  update: (args: any) => Promise<any>;
-  deleteMany: () => Promise<any>;
-  delete: (args: any) => Promise<any>;
-  create: (args: any) => Promise<any>;
+  findMany: (args?: any) => Promise<any[]>;
+  update: (args: { where: { id: number }; data: any }) => Promise<any>;
+  deleteMany: (args?: any) => Promise<any>;
+  delete: (args: { where: { id: number } }) => Promise<any>;
+  create: (args: { data: any }) => Promise<any>;
 }
 
+/**
+ * A generic CRUD controller for handling basic operations on a Prisma model.
+ * It provides methods to get all entries, add a new entry, edit an existing entry,
+ * delete a specific entry, and delete all entries.
+ */
 export class CrudController {
   private delegate: CrudDelegate;
 
@@ -34,11 +39,11 @@ export class CrudController {
 
   /**
    * Sends a JSON response of all entries in the table.
-   * `req` is ignored.
+   * `req` contains the optional criteria to filter entries to return.
    */
   getAll = (req: Request, res: Response) => {
     this.handleError(req, res, async () => {
-      const entries = await this.delegate.findMany();
+      const entries = await this.delegate.findMany(req.body);
       res.json(entries);
     });
   };
@@ -51,11 +56,9 @@ export class CrudController {
   edit = (req: Request, res: Response) => {
     this.handleError(req, res, async () => {
       const { id } = req.params;
-      const updateData = req.body; // Contains subset of properties to update
-
       const updatedEntry = await this.delegate.update({
         where: { id: Number(id) },
-        data: updateData,
+        data: req.body, // Contains subset of properties to update
       });
       res.json(updatedEntry);
     });
@@ -63,12 +66,12 @@ export class CrudController {
 
   /**
    * Deletes all entries in the table.
-   * `req` is ignored.
+   * `req` contains the optional criteria to filter entries to delete.
    * Sends a 204 No Content response.
    */
   deleteAll = (req: Request, res: Response) => {
     this.handleError(req, res, async () => {
-      await this.delegate.deleteMany();
+      await this.delegate.deleteMany(req.body);
       res.status(204).send();
     });
   };
@@ -95,13 +98,8 @@ export class CrudController {
    */
   add = (req: Request, res: Response) => {
     this.handleError(req, res, async () => {
-      const { name, eventValueOptions, eventValueType } = req.body;
       const newEntry = await this.delegate.create({
-        data: {
-          name,
-          eventValueOptions,
-          eventValueType,
-        },
+        data: req.body,
       });
       res.status(201).json(newEntry);
     });
