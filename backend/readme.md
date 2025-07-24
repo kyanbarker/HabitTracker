@@ -10,10 +10,10 @@ This README explains the two different ways to run your backend: **Local Develop
 ### Quick Start
 ```bash
 # Start only the database
-docker-compose up postgres_db -d
+npm run db:start
 
 # Run server locally with hot reload
-npm run dev
+npm run server:start
 ```
 
 ### Access Points
@@ -36,7 +36,7 @@ npm run dev
 ### Quick Start
 ```bash
 # Run everything in Docker
-docker-compose up --build -d
+npm run docker:start
 ```
 
 ### Access Points
@@ -58,7 +58,7 @@ docker-compose up --build -d
 ```bash
 # === SETUP ===
 # Start database only
-docker-compose up postgres_db -d
+npm run db:start
 
 # Install dependencies (if not done)
 npm ci
@@ -68,13 +68,13 @@ npx prisma generate
 
 # === DEVELOPMENT ===
 # Start server with hot reload
-npm run dev
+npm run server:start
 
 # Build TypeScript (for testing)
 npm run build
 
 # Run built version locally
-npm run start
+npm start
 
 # === DATABASE ===
 # Create new migration
@@ -88,10 +88,10 @@ docker-compose exec postgres_db psql -U postgres -d postgres
 
 # === CLEANUP ===
 # Stop database
-docker-compose stop postgres_db
+npm run db:stop
 
 # Remove database (loses data)
-docker-compose down postgres_db -v
+npm run docker:down
 ```
 
 ### Docker Production Commands
@@ -99,9 +99,9 @@ docker-compose down postgres_db -v
 ```bash
 # === SETUP ===
 # Start everything
-docker-compose up --build -d
+npm run docker:start
 
-# Start without rebuilding
+# Start without rebuilding (if containers exist)
 docker-compose up -d
 
 # === MONITORING ===
@@ -127,13 +127,13 @@ docker-compose exec postgres_db psql -U postgres -d postgres
 
 # === CLEANUP ===
 # Stop all services
-docker-compose down
+npm run docker:stop
 
 # Stop and remove volumes (loses data)
-docker-compose down -v
+npm run docker:down
 
 # Remove everything and rebuild
-docker-compose down -v && docker-compose up --build -d
+npm run docker:down && npm run docker:start
 ```
 
 ---
@@ -143,10 +143,10 @@ docker-compose down -v && docker-compose up --build -d
 ### Making Code Changes (Local Development)
 ```bash
 # 1. Start database
-docker-compose up postgres_db -d
+npm run db:start
 
 # 2. Start server with hot reload
-npm run dev
+npm run server:start
 
 # 3. Make changes to src/index.ts
 # (Server automatically restarts)
@@ -166,19 +166,19 @@ npx prisma generate
 npx prisma migrate dev --name describe_change
 
 # 4. If using Docker production, rebuild
-docker-compose up --build -d
+npm run docker:start
 ```
 
 ### Switching Between Workflows
 ```bash
 # From Local to Docker
-docker-compose stop postgres_db
-docker-compose up --build -d
+npm run db:stop
+npm run docker:start
 
 # From Docker to Local
-docker-compose down
-docker-compose up postgres_db -d
-npm run dev
+npm run docker:stop
+npm run db:start
+npm run server:start
 ```
 
 ---
@@ -208,8 +208,8 @@ lsof -i :5432  # Check what's using port 5432
 
 ```bash
 # Containers won't start
-docker-compose down -v  # Remove volumes
-docker-compose up --build -d  # Rebuild everything
+npm run docker:down  # Remove volumes
+npm run docker:start  # Rebuild everything
 
 # Database connection issues
 docker-compose logs postgres_db  # Check database logs
@@ -220,20 +220,20 @@ docker-compose logs server  # Check server logs
 # Make sure .env.prod has: DATABASE_URL="postgresql://postgres:prisma@postgres_db:5432/postgres?schema=public"
 
 # Code changes not reflected
-docker-compose up --build -d  # Always use --build for code changes
+npm run docker:start  # Always rebuilds containers
 ```
 
 ### General Issues
 
 ```bash
 # Clean slate restart
-docker-compose down -v
+npm run docker:down
 docker system prune -f
 rm -rf node_modules
 rm -rf generated
 npm ci
 npx prisma generate
-docker-compose up --build -d
+npm run docker:start
 
 # Check environment files
 cat .env  # Should have localhost:5432
@@ -291,10 +291,10 @@ DATABASE_URL="postgresql://postgres:prisma@postgres_db:5432/postgres?schema=publ
 
 | Task | Local Development | Docker Production |
 |------|-------------------|-------------------|
-| **Start** | `docker-compose up postgres_db -d && npm run dev` | `docker-compose up --build -d` |
-| **Stop** | `Ctrl+C` (server) + `docker-compose stop postgres_db` | `docker-compose down` |
+| **Start** | `npm run db:start && npm run server:start` | `npm run docker:start` |
+| **Stop** | `Ctrl+C` (server) + `npm run db:stop` | `npm run docker:stop` |
 | **Logs** | Terminal output + `docker-compose logs postgres_db` | `docker-compose logs -f` |
-| **Code Changes** | Automatic reload | `docker-compose up --build -d` |
+| **Code Changes** | Automatic reload | `npm run docker:start` |
 | **Database Access** | `docker-compose exec postgres_db psql -U postgres -d postgres` | `docker-compose exec postgres_db psql -U postgres -d postgres` |
 | **Migrations** | `npx prisma migrate dev --name xyz` | `docker-compose exec server npx prisma migrate dev --name xyz` |
 
@@ -307,4 +307,28 @@ DATABASE_URL="postgresql://postgres:prisma@postgres_db:5432/postgres?schema=publ
 3. **Keep both .env files in sync** - same database structure, different hostnames
 4. **Use meaningful migration names** - `add_events_table` not `init`
 5. **Check container health** - `docker-compose ps` shows service status
-6. **Clean up regularly** - `docker-compose down -v` removes old data when needed
+6. **Clean up regularly** - `npm run docker:down` removes old data when needed
+
+---
+
+## 📦 Available NPM Scripts
+
+Here are all the available scripts from `package.json`:
+
+```bash
+# Building and Running
+npm run build          # Compile TypeScript to dist/
+npm start             # Deploy migrations, generate client, and run built app
+
+# Database Management
+npm run db:start      # Start only the PostgreSQL database container
+npm run db:stop       # Stop the PostgreSQL database container
+
+# Local Development
+npm run server:start  # Start server with hot reload using nodemon
+
+# Docker Production
+npm run docker:start  # Start all containers (with rebuild)
+npm run docker:stop   # Stop all containers
+npm run docker:down   # Stop and remove all containers and volumes
+```
