@@ -66,7 +66,7 @@ const App = () => {
           date={selectedDate}
           events={events}
           onDelete={handleDeleteEvent}
-          onEdit={handleEditEvent}
+          onBlur={handleEditEvent}
         />
       )}
     </Box>
@@ -74,28 +74,15 @@ const App = () => {
 };
 
 async function getEvents(): Promise<(Event & { id: number })[]> {
-  const res = await fetch("http://localhost:3001/events");
+  const res = await fetch("http://localhost:3001/events?include=series");
   if (!res.ok) {
     throw new Error(`Failed to fetch events: ${res}`);
   }
   const events = await res.json();
-  return events.map((event: any) => {
-    // We have to manually parse the date string to a Date object
-    // because we want to disregard the time part.
-    // If we were to convert the entire iso string to a Date object,
-    // there could be errors due to time zone differences.
-    const yearString = event.date.substring(0, 4);
-    const monthString = event.date.substring(5, 7);
-    const dayString = event.date.substring(8, 10);
-    const year = parseInt(yearString, 10);
-    const month = parseInt(monthString, 10) - 1; // Month is 0-indexed in JavaScript
-    const day = parseInt(dayString, 10);
-
-    return {
-      ...event,
-      date: new Date(year, month, day),
-    };
-  }) as (Event & { id: number })[];
+  return events.map((event: any) => ({
+    ...event,
+    date: new Date(event.date.substring(0, 10)),
+  })) as (Event & { id: number })[];
 }
 
 async function addEvent(event: Event) {

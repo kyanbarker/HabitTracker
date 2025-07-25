@@ -11,17 +11,19 @@ import {
   Button,
   Paper,
   TextField,
+  MenuItem,
 } from "@mui/material";
 import { Event } from "../types/event";
+import { Series } from "../types/series";
 
 interface EventsViewProps {
   date: Date;
   events: (Event & { id: number })[];
   onDelete: (event: Event & { id: number }) => void;
-  onEdit: (id: number, updateData: Partial<Event>) => void;
+  onBlur: (id: number, updateData: Partial<Event>) => void;
 }
 
-const EventsView = ({ date, events, onDelete, onEdit }: EventsViewProps) => {
+const EventsView = ({ date, events, onDelete, onBlur }: EventsViewProps) => {
   // Local state for editable fields
   const [editValues, setEditValues] = useState<
     Record<number, { value: string; notes: string }>
@@ -62,11 +64,15 @@ const EventsView = ({ date, events, onDelete, onEdit }: EventsViewProps) => {
               )
               .map((event) => (
                 <TableRow key={event.id}>
+                  {/* series cell */}
                   <TableCell>{event.series.name}</TableCell>
+                  {/* value cell */}
                   <TableCell>
                     <TextField
                       variant="standard"
                       value={editValues[event.id]?.value ?? ""}
+                      type={getType(event.series)}
+                      select={event.series.eventValueType === "SELECTION"}
                       onChange={(e) =>
                         setEditValues((prev) => ({
                           ...prev,
@@ -77,12 +83,22 @@ const EventsView = ({ date, events, onDelete, onEdit }: EventsViewProps) => {
                         }))
                       }
                       onBlur={() =>
-                        onEdit(event.id, {
+                        onBlur(event.id, {
                           value: editValues[event.id]?.value ?? "",
                         })
                       }
-                    />
+                    >
+                      {event.series.eventValueType === "SELECTION" &&
+                        event.series.eventValueSelectionOptions.map(
+                          (option) => (
+                            <MenuItem key={option} value={option}>
+                              {option}
+                            </MenuItem>
+                          )
+                        )}
+                    </TextField>
                   </TableCell>
+                  {/* notes cell */}
                   <TableCell>
                     <TextField
                       variant="standard"
@@ -97,7 +113,7 @@ const EventsView = ({ date, events, onDelete, onEdit }: EventsViewProps) => {
                         }))
                       }
                       onBlur={() =>
-                        onEdit(event.id, {
+                        onBlur(event.id, {
                           notes: editValues[event.id]?.notes ?? "",
                         })
                       }
@@ -120,6 +136,21 @@ const EventsView = ({ date, events, onDelete, onEdit }: EventsViewProps) => {
       </TableContainer>
     </Box>
   );
+
+  function getType(series: Series) {
+    switch (series.eventValueType) {
+      case "STRING":
+        return "text";
+      case "NUMBER":
+        return "number";
+      case "SELECTION":
+        return "select";
+      case "BOOLEAN":
+        return "checkbox";
+      default:
+        return "text"; // Fallback to text if type is unknown
+    }
+  }
 };
 
 export default EventsView;

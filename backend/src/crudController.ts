@@ -39,11 +39,28 @@ export class CrudController {
 
   /**
    * Sends a JSON response of all entries in the table.
-   * `req` contains the optional criteria to filter entries to return.
+   * Query parameters are automatically converted to Prisma findMany args.
+   * Special handling for 'include' parameter: ?include=x becomes { include : { x : true } }
    */
   getAll = (req: Request, res: Response) => {
     this.handleError(req, res, async () => {
-      const entries = await this.delegate.findMany(req.body);
+      const args: any = {};
+
+      // Handle special 'include' parameter
+      if (req.query.include) {
+        const includeValue = req.query.include as string;
+        args.include = { [includeValue]: true };
+      }
+
+      // Handle other query parameters (you can extend this as needed)
+      // For example: ?take=10, ?skip=5, etc.
+      Object.keys(req.query).forEach((key) => {
+        if (key !== "include") {
+          args[key] = req.query[key];
+        }
+      });
+
+      const entries = await this.delegate.findMany(args);
       res.json(entries);
     });
   };
