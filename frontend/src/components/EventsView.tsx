@@ -15,6 +15,7 @@ import {
 } from "@mui/material";
 import { Event } from "../types/event";
 import { Series } from "../types/series";
+import { useEditableField } from "../hooks/useEditableFields";
 
 interface EventsViewProps {
   date: Date;
@@ -28,6 +29,13 @@ const EventsView = ({ date, events, onDelete, onBlur }: EventsViewProps) => {
   const [editValues, setEditValues] = useState<
     Record<number, { value: string; notes: string }>
   >({});
+
+  // Use the custom hook
+  const createFieldHandlers = useEditableField(
+    editValues,
+    setEditValues,
+    onBlur
+  );
 
   // Initialize local state when events change
   React.useEffect(() => {
@@ -64,29 +72,14 @@ const EventsView = ({ date, events, onDelete, onBlur }: EventsViewProps) => {
               )
               .map((event) => (
                 <TableRow key={event.id}>
-                  {/* series cell */}
-                  <TableCell>{event.series.name}</TableCell>
-                  {/* value cell */}
-                  <TableCell>
+                  <TableCell key={"series"}>{event.series.name}</TableCell>
+                  <TableCell key={"value"}>
                     <TextField
                       variant="standard"
                       value={editValues[event.id]?.value ?? ""}
                       type={getType(event.series)}
                       select={event.series.eventValueType === "SELECTION"}
-                      onChange={(e) =>
-                        setEditValues((prev) => ({
-                          ...prev,
-                          [event.id]: {
-                            ...prev[event.id],
-                            value: e.target.value,
-                          },
-                        }))
-                      }
-                      onBlur={() =>
-                        onBlur(event.id, {
-                          value: editValues[event.id]?.value ?? "",
-                        })
-                      }
+                      {...createFieldHandlers(event.id, "value")}
                     >
                       {event.series.eventValueType === "SELECTION" &&
                         event.series.eventValueSelectionOptions.map(
@@ -98,28 +91,14 @@ const EventsView = ({ date, events, onDelete, onBlur }: EventsViewProps) => {
                         )}
                     </TextField>
                   </TableCell>
-                  {/* notes cell */}
-                  <TableCell>
+                  <TableCell key={"notes"}>
                     <TextField
                       variant="standard"
                       value={editValues[event.id]?.notes ?? ""}
-                      onChange={(e) =>
-                        setEditValues((prev) => ({
-                          ...prev,
-                          [event.id]: {
-                            ...prev[event.id],
-                            notes: e.target.value,
-                          },
-                        }))
-                      }
-                      onBlur={() =>
-                        onBlur(event.id, {
-                          notes: editValues[event.id]?.notes ?? "",
-                        })
-                      }
+                      {...createFieldHandlers(event.id, "notes")}
                     />
                   </TableCell>
-                  <TableCell align="right">
+                  <TableCell align="right" key={"actions"}>
                     <Button
                       variant="outlined"
                       color="error"
