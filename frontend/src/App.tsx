@@ -1,4 +1,5 @@
-import { Box } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
+import { isSameDay } from "date-fns";
 import { useEffect, useState } from "react";
 import EventsView from "./components/EventsView";
 import HighlightedCalendar from "./components/HighlightedCalendar";
@@ -51,23 +52,49 @@ const App = () => {
   };
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 2, padding: 2 }}>
-      <HighlightedCalendar
-        highlightedDates={eventDates}
-        value={selectedDate}
-        onChange={(value) => setSelectedDate(value)}
-        minDate={new Date(2000, 0, 15)}
-        maxDate={new Date(2025, 11, 31)}
-        views={["year", "month", "day"]}
-        disableHighlightToday={true}
-      />
-      {selectedDate && (
-        <EventsView
-          date={selectedDate}
-          events={events}
-          onDelete={handleDeleteEvent}
-          onBlur={handleEditEvent}
+    <Box display={"flex"} flexDirection={"column"} gap={2} padding={2}>
+      <Box width={"min-content"}>
+        <HighlightedCalendar
+          highlightedDates={eventDates}
+          value={selectedDate}
+          onChange={(value) => setSelectedDate(value)}
+          minDate={new Date(2000, 0, 15)}
+          maxDate={new Date(2025, 11, 31)}
+          views={["year", "month", "day"]}
+          disableHighlightToday={true}
         />
+      </Box>
+      {selectedDate && (
+        <Box>
+          <Typography variant="h6" sx={{ mb: 2 }}>
+            Selected Date: {selectedDate.toLocaleDateString()}
+          </Typography>
+          {eventDates.some((x) => isSameDay(x, selectedDate)) ? (
+            <>
+              <EventsView
+                date={selectedDate}
+                events={events}
+                onDelete={handleDeleteEvent}
+                onBlur={handleEditEvent}
+              />
+              <Button variant="contained" fullWidth>
+                Add Event
+              </Button>
+            </>
+          ) : (
+            <Box
+              gap={2}
+              display={"flex"}
+              flexDirection={"column"}
+              alignItems={"flex-start"}
+            >
+              <Typography>
+                No events on {selectedDate.toLocaleDateString()}
+              </Typography>
+              <Button variant="contained">Add Event</Button>
+            </Box>
+          )}
+        </Box>
       )}
     </Box>
   );

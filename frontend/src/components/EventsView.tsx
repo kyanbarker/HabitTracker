@@ -1,21 +1,19 @@
-import React, { useState } from "react";
 import {
-  Box,
-  Typography,
+  Button,
+  MenuItem,
+  Paper,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Button,
-  Paper,
-  TextField,
-  MenuItem,
+  TextField
 } from "@mui/material";
+import React, { useState } from "react";
+import { useEditableField } from "../hooks/useEditableFields";
 import { Event } from "../types/event";
 import { Series } from "../types/series";
-import { useEditableField } from "../hooks/useEditableFields";
 
 interface EventsViewProps {
   date: Date;
@@ -50,70 +48,63 @@ const EventsView = ({ date, events, onDelete, onBlur }: EventsViewProps) => {
   }, [events]);
 
   return (
-    <Box sx={{ marginTop: 2 }}>
-      <Typography variant="h6" sx={{ mb: 2 }}>
-        Selected Date: {date.toLocaleDateString()}
-      </Typography>
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Series</TableCell>
-              <TableCell>Value</TableCell>
-              <TableCell>Notes</TableCell>
-              <TableCell align="right">Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {events
-              .filter(
-                (event) =>
-                  new Date(event.date).toDateString() === date.toDateString()
-              )
-              .map((event) => (
-                <TableRow key={event.id}>
-                  <TableCell key={"series"}>{event.series.name}</TableCell>
-                  <TableCell key={"value"}>
-                    <TextField
-                      variant="standard"
-                      value={editValues[event.id]?.value ?? ""}
-                      type={getType(event.series)}
-                      select={event.series.eventValueType === "SELECTION"}
-                      {...createFieldHandlers(event.id, "value")}
-                    >
-                      {event.series.eventValueType === "SELECTION" &&
-                        event.series.eventValueSelectionOptions.map(
-                          (option) => (
-                            <MenuItem key={option} value={option}>
-                              {option}
-                            </MenuItem>
-                          )
-                        )}
-                    </TextField>
-                  </TableCell>
-                  <TableCell key={"notes"}>
-                    <TextField
-                      variant="standard"
-                      value={editValues[event.id]?.notes ?? ""}
-                      {...createFieldHandlers(event.id, "notes")}
-                    />
-                  </TableCell>
-                  <TableCell align="right" key={"actions"}>
-                    <Button
-                      variant="outlined"
-                      color="error"
-                      size="small"
-                      onClick={() => onDelete(event)}
-                    >
-                      Delete
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </Box>
+    <TableContainer component={Paper}>
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell>Series</TableCell>
+            <TableCell>Value</TableCell>
+            <TableCell>Notes</TableCell>
+            <TableCell align="right">Actions</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {events
+            .filter(
+              (event) =>
+                new Date(event.date).toDateString() === date.toDateString()
+            )
+            .map((event) => (
+              <TableRow key={event.id}>
+                <TableCell key={"series"}>{event.series.name}</TableCell>
+                <TableCell key={"value"}>
+                  <TextField
+                    variant="standard"
+                    value={editValues[event.id]?.value ?? ""}
+                    type={getType(event.series)}
+                    select={event.series.eventValueType === "SELECTION"}
+                    {...createFieldHandlers(event.id, "value")}
+                  >
+                    {event.series.eventValueType === "SELECTION" &&
+                      event.series.eventValueSelectionOptions.map((option) => (
+                        <MenuItem key={option} value={option}>
+                          {option}
+                        </MenuItem>
+                      ))}
+                  </TextField>
+                </TableCell>
+                <TableCell key={"notes"}>
+                  <TextField
+                    variant="standard"
+                    value={editValues[event.id]?.notes ?? ""}
+                    {...createFieldHandlers(event.id, "notes")}
+                  />
+                </TableCell>
+                <TableCell align="right" key={"actions"}>
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    size="small"
+                    onClick={() => onDelete(event)}
+                  >
+                    Delete
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 
   function getType(series: Series) {
