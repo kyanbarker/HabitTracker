@@ -1,9 +1,40 @@
 import { Box, Button, Typography } from "@mui/material";
+import { GridColDef } from "@mui/x-data-grid";
 import { isSameDay } from "date-fns";
 import { useEffect, useState } from "react";
+import { CrudTable } from "./components/CrudTable";
 import EventsView from "./components/EventsView";
 import HighlightedCalendar from "./components/HighlightedCalendar";
+import RequestAndResponseView from "./components/RequestAndResponseView";
 import { Event } from "./types/event";
+import { EventValueType } from "./types/series";
+import { eventApi as eventsApi, seriesApi } from "./util/api";
+
+const seriesColumns: GridColDef[] = [
+  { field: "id", headerName: "ID", width: 70, type: "number" },
+  { field: "name", headerName: "Name", width: 180 },
+  { field: "eventValueType", headerName: "Value Type", width: 120 },
+  {
+    field: "eventValueSelectionOptions",
+    headerName: "Value Options",
+    width: 200,
+    valueGetter: (params: any) =>
+      (params?.row?.eventValueSelectionOptions || []).join(", "),
+  },
+];
+
+const eventColumns: GridColDef[] = [
+  { field: "id", headerName: "ID", width: 70, type: "number" },
+  {
+    field: "series",
+    headerName: "Series",
+    width: 120,
+    valueGetter: (params: any) => params?.row?.series?.name || "",
+  },
+  { field: "value", headerName: "Value", width: 120 },
+  { field: "date", headerName: "Date", width: 160 },
+  { field: "notes", headerName: "Notes", width: 200 },
+];
 
 const App = () => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -13,7 +44,7 @@ const App = () => {
   useEffect(() => {
     async function fetchEvents() {
       try {
-        const fetchedEvents = await getEvents();
+        const fetchedEvents = await eventsApi.getAll();
         setEvents(
           fetchedEvents.sort((a, b) => {
             if (a.series.name < b.series.name) return -1;
@@ -32,20 +63,17 @@ const App = () => {
 
   const handleDeleteEvent = async (event: Event & { id: number }) => {
     try {
-      await deleteEvent(event.id);
-      setRefresh((x) => x + 1); // Trigger useEffect to refetch events
+      await eventsApi.delete(event.id);
+      setRefresh((x) => x + 1);
     } catch (error) {
       console.error("Failed to delete event:", error);
     }
   };
 
-  const handleEditEvent = async (
-    id: number,
-    updateData: Partial<Event>
-  ): Promise<void> => {
+  const handleEditEvent = async (id: number, updateData: Partial<Event>) => {
     try {
-      await editEvent(id, updateData);
-      setRefresh((x) => x + 1); // Trigger useEffect to refetch events
+      await eventsApi.update(id, updateData);
+      setRefresh((x) => x + 1);
     } catch (error) {
       console.error("Failed to edit event:", error);
     }
@@ -53,6 +81,7 @@ const App = () => {
 
   return (
     <Box display={"flex"} flexDirection={"column"} gap={2} padding={2}>
+      <RequestAndResponseView />
       <Box width={"min-content"}>
         <HighlightedCalendar
           highlightedDates={eventDates}
@@ -96,51 +125,37 @@ const App = () => {
           )}
         </Box>
       )}
+
+      {/* Generic CRUD tables for admin/advanced use */}
+      <Box sx={{ maxWidth: 900, margin: "0 auto", padding: 4 }}>
+        <CrudTable
+          columns={seriesColumns}
+          api={seriesApi}
+          initialFormState={{
+            name: "",
+            eventValueType: EventValueType.STRING,
+            eventValueSelectionOptions: [],
+          }}
+          title="Series"
+        />
+        <CrudTable
+          columns={eventColumns}
+          api={eventsApi}
+          initialFormState={{
+            series: {
+              name: "",
+              eventValueType: EventValueType.STRING,
+              eventValueSelectionOptions: [],
+            },
+            value: "",
+            date: new Date(),
+            notes: "",
+          }}
+          title="Event"
+        />
+      </Box>
     </Box>
   );
 };
-
-async function getEvents(): Promise<(Event & { id: number })[]> {
-  const res = await fetch("http://localhost:3001/events?include=series");
-  if (!res.ok) {
-    throw new Error(`Failed to fetch events: ${res}`);
-  }
-  const events = await res.json();
-  return events.map((event: any) => ({
-    ...event,
-    date: new Date(event.date.substring(0, 10)),
-  })) as (Event & { id: number })[];
-}
-
-async function addEvent(event: Event) {
-  const res = await fetch("http://localhost:3001/events", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(event),
-  });
-  if (!res.ok) {
-    throw new Error(`Failed to add event: ${res}`);
-  }
-}
-
-async function deleteEvent(id: number) {
-  const res = await fetch(`http://localhost:3001/events/${id}`, {
-    method: "DELETE",
-  });
-  if (!res.ok) {
-    throw new Error(`Failed to delete event: ${res}`);
-  }
-}
-
-async function editEvent(id: number, updateData: Partial<Event>) {
-  const res = await fetch(`http://localhost:3001/events/${id}`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(updateData),
-  });
-  if (!res.ok) {
-    throw new Error(`Failed to edit event: ${res}`);
-  }
-}
 
 export default App;
