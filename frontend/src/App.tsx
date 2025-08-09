@@ -6,9 +6,10 @@ import { CrudTable } from "./components/CrudTable";
 import EventsView from "./components/EventsView";
 import HighlightedCalendar from "./components/HighlightedCalendar";
 import RequestAndResponseView from "./components/RequestAndResponseView";
-import { Event } from "./types/event";
-import { EventValueType } from "./types/series";
 import { eventApi as eventsApi, seriesApi } from "./util/api";
+import { Event } from "../../shared/types/event";
+import { Id } from "../../shared/types/id";
+import { EventValueType } from "../../shared/types/series";
 
 const seriesColumns: GridColDef[] = [
   { field: "id", headerName: "ID", width: 70, type: "number" },
@@ -38,7 +39,7 @@ const eventColumns: GridColDef[] = [
 
 const App = () => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [events, setEvents] = useState<(Event & { id: number })[]>([]);
+  const [events, setEvents] = useState<(Event & Id)[]>([]);
   const [refresh, setRefresh] = useState(0);
 
   useEffect(() => {
@@ -127,7 +128,7 @@ const App = () => {
       )}
 
       {/* Generic CRUD tables for admin/advanced use */}
-      <Box sx={{ maxWidth: 900, margin: "0 auto", padding: 4 }}>
+      <Box width={"min-content"}>
         <CrudTable
           columns={seriesColumns}
           api={seriesApi}
