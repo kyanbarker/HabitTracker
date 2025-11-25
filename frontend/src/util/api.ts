@@ -1,6 +1,5 @@
-import { Series } from "../../../shared/types/series";
-import { Event } from "../../../shared/types/event";
-import { Id } from "../../../shared/types/id";
+import { Series } from "../types/series";
+import { Event } from "../types/event";
 
 const API_BASE = "http://localhost:3001";
 
@@ -34,15 +33,15 @@ export class CrudApi<T> {
   }
 }
 
-export class SeriesApi extends CrudApi<Series & Id> {
+export class SeriesApi extends CrudApi<Series & { id: number }> {
   constructor() {
     super("series");
   }
 }
 
-export class EventApi extends CrudApi<Event & Id> {
+export class EventApi extends CrudApi<Event & { id: number }> {
   constructor() {
-    super("events");
+    super("event");
   }
 }
 

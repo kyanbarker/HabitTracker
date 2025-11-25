@@ -12,8 +12,8 @@ import {
 } from "@mui/material";
 import React, { useState } from "react";
 import { useEditableField } from "../hooks/useEditableFields";
-import { Event } from "../../../shared/types/event";
-import { Series } from "../../../shared/types/series";
+import { Event } from "../types/event";
+import { Series } from "../types/series";
 
 interface EventsViewProps {
   date: Date;

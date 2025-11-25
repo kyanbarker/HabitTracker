@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { CrudApi } from "../util/api";
 import {
   Box,
@@ -33,11 +33,15 @@ export function CrudTable<T extends { id: number }>({
   const [form, setForm] = useState<Partial<T>>(initialFormState);
   const [editingId, setEditingId] = useState<number | null>(null);
 
-  const fetchRows = useCallback(async () => setRows(await api.getAll()), [api]);
+  const fetchRows = async () => {
+    const data = await api.getAll();
+    setRows(data);
+  };
 
   useEffect(() => {
     fetchRows();
-  }, [fetchRows]);
+    // eslint-disable-next-line
+  }, []);
 
   const handleOpen = (row?: T) => {
     if (row) {
@@ -65,18 +69,12 @@ export function CrudTable<T extends { id: number }>({
     const fieldValue = form[fieldName];
 
     // Special handling for date fields
-    if (col.field === "date" || col.type === "date") {
+    if (col.field === 'date' || col.type === 'date') {
       return (
         <LocalizationProvider dateAdapter={AdapterDateFns}>
           <DatePicker
             label={col.headerName}
-            value={
-              fieldValue instanceof Date
-                ? fieldValue
-                : fieldValue
-                ? new Date(fieldValue as string)
-                : null
-            }
+            value={fieldValue instanceof Date ? fieldValue : fieldValue ? new Date(fieldValue as string) : null}
             onChange={(newValue) => handleChange(fieldName, newValue)}
             slotProps={{
               textField: {
@@ -138,7 +136,7 @@ export function CrudTable<T extends { id: number }>({
   };
 
   return (
-    <Box width={"min-content"}>
+    <Box sx={{ my: 4 }}>
       <Box
         display="flex"
         justifyContent="space-between"
