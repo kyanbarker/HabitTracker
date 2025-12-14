@@ -12,22 +12,13 @@ model Event {
   id       Int      @id @default(autoincrement())
   seriesId Int
   series   Series   @relation(fields: [seriesId], references: [id])
-  value    String
+  value    Float
   date     DateTime @default(now())
   notes    String
 }
 
 model Series {
-  id                Int       @id @default(autoincrement())
-  name              String    @unique
-  eventValueOptions String[] // empty when eventValueType !== SELECTION
-  eventValueType    ValueType
-  events            Event[]
-}
-
-enum ValueType {
-  STRING
-  NUMBER
-  BOOLEAN
-  SELECTION
+  id     Int     @id @default(autoincrement())
+  name   String  @unique
+  events Event[]
 }

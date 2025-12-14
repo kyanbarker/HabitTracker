@@ -1,11 +1,8 @@
--- CreateEnum
-CREATE TYPE "ValueType" AS ENUM ('STRING', 'NUMBER', 'BOOLEAN', 'SELECTION');
-
 -- CreateTable
 CREATE TABLE "Event" (
     "id" SERIAL NOT NULL,
     "seriesId" INTEGER NOT NULL,
-    "value" TEXT NOT NULL,
+    "value" DOUBLE PRECISION NOT NULL,
     "date" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "notes" TEXT NOT NULL,
 
@@ -16,8 +13,6 @@ CREATE TABLE "Event" (
 CREATE TABLE "Series" (
     "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
-    "eventValueOptions" TEXT[],
-    "eventValueType" "ValueType" NOT NULL,
 
     CONSTRAINT "Series_pkey" PRIMARY KEY ("id")
 );

@@ -1,7 +1,7 @@
 import { Series } from "../types/series";
 import { Event } from "../types/event";
 
-const API_BASE = "http://localhost:3001";
+const API_BASE = (import.meta as any).env?.VITE_API_BASE || "";
 
 export class CrudApi<T> {
   base: string;

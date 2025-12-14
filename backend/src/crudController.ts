@@ -25,12 +25,11 @@ export class CrudController {
    * If an error occurs, it logs the error and sends a 500 response with the error.
    */
   private async handleError(
-    req: Request,
     res: Response,
-    func: (req: Request, res: Response) => Promise<void>
+    func: () => Promise<void>
   ) {
     try {
-      await func(req, res);
+      await func();
     } catch (error) {
       console.error(error);
       res.status(500).json(error);
@@ -40,16 +39,24 @@ export class CrudController {
   /**
    * Sends a JSON response of all entries in the table.
    * Query parameters are automatically converted to Prisma findMany args.
-   * Special handling for 'include' parameter: ?include=x becomes { include : { x : true } }
+   * Special handling for 'include' parameter:
+   * - Single: ?include=x becomes { include : { x : true } }
+   * - Multiple: ?include=x&include=y becomes { include : { x : true, y : true } }
    */
   getAll = (req: Request, res: Response) => {
-    this.handleError(req, res, async () => {
+    this.handleError(res, async () => {
       const args: any = {};
 
-      // Handle special 'include' parameter
+      // Handle special 'include' parameter (supports multiple values)
       if (req.query.include) {
-        const includeValue = req.query.include as string;
-        args.include = { [includeValue]: true };
+        const includeValues = Array.isArray(req.query.include) 
+          ? req.query.include 
+          : [req.query.include];
+        
+        args.include = includeValues.reduce((acc, val) => {
+          acc[val as string] = true;
+          return acc;
+        }, {} as Record<string, boolean>);
       }
 
       // Handle other query parameters (you can extend this as needed)
@@ -71,7 +78,7 @@ export class CrudController {
    * Sends a JSON response of the updated entry.
    */
   edit = (req: Request, res: Response) => {
-    this.handleError(req, res, async () => {
+    this.handleError(res, async () => {
       const { id } = req.params;
       const updatedEntry = await this.delegate.update({
         where: { id: Number(id) },
@@ -87,7 +94,7 @@ export class CrudController {
    * Sends a 204 No Content response.
    */
   deleteAll = (req: Request, res: Response) => {
-    this.handleError(req, res, async () => {
+    this.handleError(res, async () => {
       await this.delegate.deleteMany(req.body);
       res.status(204).send();
     });
@@ -99,7 +106,7 @@ export class CrudController {
    * Sends a 204 No Content response.
    */
   delete = (req: Request, res: Response) => {
-    this.handleError(req, res, async () => {
+    this.handleError(res, async () => {
       const { id } = req.params;
       await this.delegate.delete({
         where: { id: Number(id) },
@@ -114,7 +121,7 @@ export class CrudController {
    * Sends a 201 Created response with the new entry in JSON format.
    */
   add = (req: Request, res: Response) => {
-    this.handleError(req, res, async () => {
+    this.handleError(res, async () => {
       const newEntry = await this.delegate.create({
         data: req.body,
       });
