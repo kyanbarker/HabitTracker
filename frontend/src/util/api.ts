@@ -1,7 +1,7 @@
 import { Series } from "../types/series";
 import { Event } from "../types/event";
 
-const API_BASE = (import.meta as any).env?.VITE_API_BASE || "";
+const API_BASE = "http://localhost:3001/api";
 
 export class CrudApi<T> {
   base: string;
@@ -22,7 +22,7 @@ export class CrudApi<T> {
   }
   async update(id: number, data: Partial<T>): Promise<T> {
     const res = await fetch(`${API_BASE}/${this.base}/${id}`, {
-      method: "PUT",
+      method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
@@ -41,7 +41,7 @@ export class SeriesApi extends CrudApi<Series & { id: number }> {
 
 export class EventApi extends CrudApi<Event & { id: number }> {
   constructor() {
-    super("event");
+    super("events");
   }
 }
 

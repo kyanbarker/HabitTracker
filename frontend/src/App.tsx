@@ -7,20 +7,11 @@ import EventsView from "./components/EventsView";
 import HighlightedCalendar from "./components/HighlightedCalendar";
 import RequestAndResponseView from "./components/RequestAndResponseView";
 import { Event } from "./types/event";
-import { EventValueType } from "./types/series";
 import { eventApi as eventsApi, seriesApi } from "./util/api";
 
 const seriesColumns: GridColDef[] = [
   { field: "id", headerName: "ID", width: 70, type: "number" },
   { field: "name", headerName: "Name", width: 180 },
-  { field: "eventValueType", headerName: "Value Type", width: 120 },
-  {
-    field: "eventValueSelectionOptions",
-    headerName: "Value Options",
-    width: 200,
-    valueGetter: (params: any) =>
-      (params?.row?.eventValueSelectionOptions || []).join(", "),
-  },
 ];
 
 const eventColumns: GridColDef[] = [
@@ -133,8 +124,6 @@ const App = () => {
           api={seriesApi}
           initialFormState={{
             name: "",
-            eventValueType: EventValueType.STRING,
-            eventValueSelectionOptions: [],
           }}
           title="Series"
         />
@@ -144,10 +133,8 @@ const App = () => {
           initialFormState={{
             series: {
               name: "",
-              eventValueType: EventValueType.STRING,
-              eventValueSelectionOptions: [],
             },
-            value: "",
+            value: 0,
             date: new Date(),
             notes: "",
           }}

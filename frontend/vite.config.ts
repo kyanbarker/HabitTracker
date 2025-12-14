@@ -7,13 +7,10 @@ export default defineConfig({
     port: 3000,
     open: true,
     proxy: {
-      '/series': {
+      '/api': {
         target: 'http://localhost:3001',
         changeOrigin: true,
-      },
-      '/event': {
-        target: 'http://localhost:3001',
-        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
       },
     },
   },
