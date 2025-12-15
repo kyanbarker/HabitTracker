@@ -7,7 +7,7 @@ export class CrudApi<T> {
   constructor(base: string) {
     this.base = base;
   }
-  async getAll(): Promise<T[]> {
+  async findMany(): Promise<T[]> {
     const res = await fetch(`${API_BASE}/${this.base}`);
     return res.json();
   }

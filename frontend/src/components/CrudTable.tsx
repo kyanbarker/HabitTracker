@@ -34,7 +34,7 @@ export function CrudTable<T extends { id: number }>({
   const [editingId, setEditingId] = useState<number | null>(null);
 
   const fetchRows = async () => {
-    const data = await api.getAll();
+    const data = await api.findMany();
     setRows(data);
   };
 
