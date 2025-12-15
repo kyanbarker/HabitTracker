@@ -14,7 +14,7 @@ interface CrudDelegate {
  * delete a specific entry, and delete all entries.
  */
 export class CrudController {
-  private delegate: CrudDelegate;
+  protected delegate: CrudDelegate;
 
   constructor(delegate: CrudDelegate) {
     this.delegate = delegate;

@@ -1,5 +1,6 @@
 import cors from "cors";
 import express from "express";
+import { Request, Response } from "express";
 import { CrudController } from "./crudController";
 import { prisma } from "./prisma";
 import { LoggingCrudController } from "./loggingCrudController";

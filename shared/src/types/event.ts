@@ -1,7 +1,20 @@
-import { Series } from "./series";
+export interface EventInput {
+  seriesId: number;
+  value: number;
+  date: Date;
+  notes: string;
+}
 
-export interface Event {
-  series: Series;
+export interface EventOutput {
+  seriesId: number;
+  value: number;
+  date: Date;
+  notes: string;
+  id: number;
+}
+
+export interface EventRow {
+  seriesName: string;
   value: number;
   date: Date;
   notes: string;

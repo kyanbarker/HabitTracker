@@ -1,18 +1,17 @@
-import { Event, Series } from "@series-tracker/shared";
-import { OmitId } from "./util";
+import { EventInput, EventOutput, SeriesInput, SeriesOutput } from "@series-tracker/shared";
 
 const API_BASE = "http://localhost:3001/api";
 
-export class CrudApi<T> {
+export class CrudApi<I, O> {
   base: string;
   constructor(base: string) {
     this.base = base;
   }
-  async findMany(): Promise<T[]> {
+  async findMany(): Promise<O[]> {
     const res = await fetch(`${API_BASE}/${this.base}`);
     return res.json();
   }
-  async create(data: OmitId<T>): Promise<T> {
+  async create(data: I): Promise<O> {
     const res = await fetch(`${API_BASE}/${this.base}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -20,7 +19,7 @@ export class CrudApi<T> {
     });
     return res.json();
   }
-  async update(id: number, data: OmitId<T>): Promise<T> {
+  async update(id: number, data: I): Promise<O> {
     const res = await fetch(`${API_BASE}/${this.base}/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -33,13 +32,13 @@ export class CrudApi<T> {
   }
 }
 
-export class SeriesApi extends CrudApi<Series> {
+export class SeriesApi extends CrudApi<SeriesInput, SeriesOutput> {
   constructor() {
     super("series");
   }
 }
 
-export class EventApi extends CrudApi<Event> {
+export class EventApi extends CrudApi<EventInput, EventOutput> {
   constructor() {
     super("events");
   }
