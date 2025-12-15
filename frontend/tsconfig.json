@@ -14,7 +14,12 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@series-tracker/shared": ["../shared/src/index"],
+      "@series-tracker/shared/*": ["../shared/src/*"]
+    }
   },
   "include": ["src"]
 }

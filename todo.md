@@ -1,0 +1,1 @@
+- Backend: Reject creation of a new series if a series with the same `name` already exists in the database.

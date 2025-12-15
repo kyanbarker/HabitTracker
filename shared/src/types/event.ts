@@ -1,5 +1,7 @@
+import { Series } from "./series";
+
 export interface Event {
-  seriesName: string;
+  series: Series;
   value: number;
   date: Date;
   notes: string;

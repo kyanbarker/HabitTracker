@@ -1,5 +1,4 @@
-import { Series } from "../types/series";
-import { Event } from "../types/event";
+import { Event, Series } from "@series-tracker/shared";
 
 const API_BASE = "http://localhost:3001/api";
 
@@ -12,7 +11,7 @@ export class CrudApi<T> {
     const res = await fetch(`${API_BASE}/${this.base}`);
     return res.json();
   }
-  async create(data: Partial<T>): Promise<T> {
+  async create(data: Omit<T, "id">): Promise<T> {
     const res = await fetch(`${API_BASE}/${this.base}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -20,7 +19,7 @@ export class CrudApi<T> {
     });
     return res.json();
   }
-  async update(id: number, data: Partial<T>): Promise<T> {
+  async update(id: number, data: Omit<T, "id">): Promise<T> {
     const res = await fetch(`${API_BASE}/${this.base}/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -33,13 +32,13 @@ export class CrudApi<T> {
   }
 }
 
-export class SeriesApi extends CrudApi<Series & { id: number }> {
+export class SeriesApi extends CrudApi<Series> {
   constructor() {
     super("series");
   }
 }
 
-export class EventApi extends CrudApi<Event & { id: number }> {
+export class EventApi extends CrudApi<Event> {
   constructor() {
     super("events");
   }

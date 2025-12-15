@@ -38,36 +38,10 @@ export class CrudController {
 
   /**
    * Sends a JSON response of all entries in the table.
-   * Query parameters are automatically converted to Prisma findMany args.
-   * Special handling for 'include' parameter:
-   * - Single: ?include=x becomes { include : { x : true } }
-   * - Multiple: ?include=x&include=y becomes { include : { x : true, y : true } }
    */
-  getAll = (req: Request, res: Response) => {
+  getAll = (_: Request, res: Response) => {
     this.handleError(res, async () => {
-      const args: any = {};
-
-      // Handle special 'include' parameter (supports multiple values)
-      if (req.query.include) {
-        const includeValues = Array.isArray(req.query.include) 
-          ? req.query.include 
-          : [req.query.include];
-        
-        args.include = includeValues.reduce((acc, val) => {
-          acc[val as string] = true;
-          return acc;
-        }, {} as Record<string, boolean>);
-      }
-
-      // Handle other query parameters (you can extend this as needed)
-      // For example: ?take=10, ?skip=5, etc.
-      Object.keys(req.query).forEach((key) => {
-        if (key !== "include") {
-          args[key] = req.query[key];
-        }
-      });
-
-      const entries = await this.delegate.findMany(args);
+      const entries = await this.delegate.findMany();
       res.json(entries);
     });
   };
@@ -95,7 +69,7 @@ export class CrudController {
    */
   deleteAll = (req: Request, res: Response) => {
     this.handleError(res, async () => {
-      await this.delegate.deleteMany(req.body);
+      await this.delegate.deleteMany();
       res.status(204).send();
     });
   };

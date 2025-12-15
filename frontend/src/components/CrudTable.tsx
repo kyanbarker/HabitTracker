@@ -18,7 +18,7 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 interface CrudTableProps<T> {
   columns: GridColDef[];
   api: CrudApi<T>;
-  initialFormState: Partial<T>;
+  initialFormState: Omit<T, "id">;
   title: string;
 }
 
@@ -30,7 +30,7 @@ export function CrudTable<T extends { id: number }>({
 }: CrudTableProps<T>) {
   const [rows, setRows] = useState<T[]>([]);
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState<Partial<T>>(initialFormState);
+  const [form, setForm] = useState<Omit<T, "id">>(initialFormState);
   const [editingId, setEditingId] = useState<number | null>(null);
 
   const fetchRows = async () => {
@@ -65,16 +65,22 @@ export function CrudTable<T extends { id: number }>({
   };
 
   const renderFormField = (col: GridColDef) => {
-    const fieldName = col.field as keyof T;
+    const fieldName = col.field as keyof Omit<T, "id">;
     const fieldValue = form[fieldName];
 
     // Special handling for date fields
-    if (col.field === 'date' || col.type === 'date') {
+    if (col.field === "date" || col.type === "date") {
       return (
         <LocalizationProvider dateAdapter={AdapterDateFns}>
           <DatePicker
             label={col.headerName}
-            value={fieldValue instanceof Date ? fieldValue : fieldValue ? new Date(fieldValue as string) : null}
+            value={
+              fieldValue instanceof Date
+                ? fieldValue
+                : fieldValue
+                ? new Date(fieldValue as string)
+                : null
+            }
             onChange={(newValue) => handleChange(fieldName, newValue)}
             slotProps={{
               textField: {
