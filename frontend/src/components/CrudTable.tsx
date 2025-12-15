@@ -14,11 +14,12 @@ import { DataGrid, GridColDef, GridActionsCellItem } from "@mui/x-data-grid";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { OmitId } from "src/util/util";
 
 interface CrudTableProps<T> {
   columns: GridColDef[];
   api: CrudApi<T>;
-  initialFormState: Omit<T, "id">;
+  initialFormState: OmitId<T>;
   title: string;
 }
 
@@ -30,7 +31,7 @@ export function CrudTable<T extends { id: number }>({
 }: CrudTableProps<T>) {
   const [rows, setRows] = useState<T[]>([]);
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState<Omit<T, "id">>(initialFormState);
+  const [form, setForm] = useState<OmitId<T>>(initialFormState);
   const [editingId, setEditingId] = useState<number | null>(null);
 
   const fetchRows = async () => {
@@ -65,7 +66,7 @@ export function CrudTable<T extends { id: number }>({
   };
 
   const renderFormField = (col: GridColDef) => {
-    const fieldName = col.field as keyof Omit<T, "id">;
+    const fieldName = col.field as keyof OmitId<T>;
     const fieldValue = form[fieldName];
 
     // Special handling for date fields

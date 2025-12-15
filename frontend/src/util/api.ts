@@ -1,4 +1,5 @@
 import { Event, Series } from "@series-tracker/shared";
+import { OmitId } from "./util";
 
 const API_BASE = "http://localhost:3001/api";
 
@@ -11,7 +12,7 @@ export class CrudApi<T> {
     const res = await fetch(`${API_BASE}/${this.base}`);
     return res.json();
   }
-  async create(data: Omit<T, "id">): Promise<T> {
+  async create(data: OmitId<T>): Promise<T> {
     const res = await fetch(`${API_BASE}/${this.base}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -19,7 +20,7 @@ export class CrudApi<T> {
     });
     return res.json();
   }
-  async update(id: number, data: Omit<T, "id">): Promise<T> {
+  async update(id: number, data: OmitId<T>): Promise<T> {
     const res = await fetch(`${API_BASE}/${this.base}/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
