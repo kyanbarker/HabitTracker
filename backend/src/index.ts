@@ -15,11 +15,11 @@ app.use(express.json());
 const seriesController = new LoggingCrudController(
   new CrudController(prisma.series)
 );
-app.get("/api/series", seriesController.getAll);
-app.post("/api/series", seriesController.add);
+app.get("/api/series", seriesController.findMany);
+app.post("/api/series", seriesController.create);
 app.delete("/api/series/:id", seriesController.delete);
-app.delete("/api/series", seriesController.deleteAll);
-app.patch("/api/series/:id", seriesController.edit);
+app.delete("/api/series", seriesController.deleteMany);
+app.patch("/api/series/:id", seriesController.update);
 
 // ============================================================================
 // events
@@ -28,11 +28,11 @@ app.patch("/api/series/:id", seriesController.edit);
 const eventController = new LoggingCrudController(
   new CrudController(prisma.event)
 );
-app.get("/api/events", eventController.getAll);
-app.post("/api/events", eventController.add);
+app.get("/api/events", eventController.findMany);
+app.post("/api/events", eventController.create);
 app.delete("/api/events/:id", eventController.delete);
-app.delete("/api/events", eventController.deleteAll);
-app.patch("/api/events/:id", eventController.edit);
+app.delete("/api/events", eventController.deleteMany);
+app.patch("/api/events/:id", eventController.update);
 
 const PORT = 3001;
 app.listen(PORT, () => {

@@ -39,7 +39,7 @@ export class CrudController {
   /**
    * Sends a JSON response of all entries in the table.
    */
-  getAll = (_: Request, res: Response) => {
+  findMany = (_: Request, res: Response) => {
     this.handleError(res, async () => {
       const entries = await this.delegate.findMany();
       res.json(entries);
@@ -51,7 +51,7 @@ export class CrudController {
    * `req` contains the id of the entry to update and the properties to update.
    * Sends a JSON response of the updated entry.
    */
-  edit = (req: Request, res: Response) => {
+  update = (req: Request, res: Response) => {
     this.handleError(res, async () => {
       const { id } = req.params;
       const updatedEntry = await this.delegate.update({
@@ -67,7 +67,7 @@ export class CrudController {
    * `req` contains the optional criteria to filter entries to delete.
    * Sends a 204 No Content response.
    */
-  deleteAll = (req: Request, res: Response) => {
+  deleteMany = (req: Request, res: Response) => {
     this.handleError(res, async () => {
       await this.delegate.deleteMany();
       res.status(204).send();
@@ -94,7 +94,7 @@ export class CrudController {
    * `req` contains the properties of the new entry to add.
    * Sends a 201 Created response with the new entry in JSON format.
    */
-  add = (req: Request, res: Response) => {
+  create = (req: Request, res: Response) => {
     this.handleError(res, async () => {
       const newEntry = await this.delegate.create({
         data: req.body,

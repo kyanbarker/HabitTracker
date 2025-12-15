@@ -25,19 +25,19 @@ export class LoggingCrudController {
     });
   }
 
-  getAll = (req: Request, res: Response) => {
-    this.logRequest("getAll", req);
-    return this.controller.getAll(req, res);
+  findMany = (req: Request, res: Response) => {
+    this.logRequest("findMany", req);
+    return this.controller.findMany(req, res);
   };
 
-  edit = (req: Request, res: Response) => {
-    this.logRequest("edit", req);
-    return this.controller.edit(req, res);
+  update = (req: Request, res: Response) => {
+    this.logRequest("update", req);
+    return this.controller.update(req, res);
   };
 
-  deleteAll = (req: Request, res: Response) => {
-    this.logRequest("deleteAll", req);
-    return this.controller.deleteAll(req, res);
+  deleteMany = (req: Request, res: Response) => {
+    this.logRequest("deleteMany", req);
+    return this.controller.deleteMany(req, res);
   };
 
   delete = (req: Request, res: Response) => {
@@ -45,8 +45,8 @@ export class LoggingCrudController {
     return this.controller.delete(req, res);
   };
 
-  add = (req: Request, res: Response) => {
+  create = (req: Request, res: Response) => {
     this.logRequest("add", req);
-    return this.controller.add(req, res);
+    return this.controller.create(req, res);
   };
 }
