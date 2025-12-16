@@ -78,7 +78,6 @@ export function EventCrudTable() {
     form: OmitId<EventRow>
   ) => {
     if (field === "seriesName") {
-      console.log(value);
       return (
         <Autocomplete
           options={seriesList.map((s) => s.name)}

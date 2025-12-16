@@ -17,7 +17,7 @@ export function SeriesCrudTable() {
         name: "",
       }}
       title="Series"
-      responseToRows={(series: SeriesOutput) => series}
+      responseToRows={x => x}
     />
   );
 }

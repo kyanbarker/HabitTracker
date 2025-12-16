@@ -33,6 +33,9 @@ interface CrudTableProps<I, O, V extends { id: number }> {
   ) => ReactNode | null;
 }
 
+// I : the type we provide to the API when creating/updating
+// O : the type we receive from the API when fetching
+// R : the type we use in the table rows and form (may differ from O)
 export function CrudTable<I, O, R extends { id: number }>({
   columns,
   api,
