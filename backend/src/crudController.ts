@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 
-interface CrudDelegate {
+export interface CrudDelegate {
   findMany: (args?: any) => Promise<any[]>;
   update: (args: { where: { id: number }; data: any }) => Promise<any>;
   deleteMany: (args?: any) => Promise<any>;

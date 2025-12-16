@@ -1,14 +1,10 @@
 import { Request, Response } from "express";
-import { CrudController, ICrudController } from "./crudController";
+import {
+  CrudController,
+  CrudDelegate,
+  ICrudController,
+} from "./crudController";
 import { prisma } from "./prisma";
-
-interface CrudDelegate {
-  findMany: (args?: any) => Promise<any[]>;
-  update: (args: { where: { id: number }; data: any }) => Promise<any>;
-  deleteMany: (args?: any) => Promise<any>;
-  delete: (args: { where: { id: number } }) => Promise<any>;
-  create: (args: { data: any }) => Promise<any>;
-}
 
 export class EventController implements ICrudController {
   private crudController: CrudController;
