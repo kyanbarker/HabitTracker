@@ -8,12 +8,20 @@ interface CrudDelegate {
   create: (args: { data: any }) => Promise<any>;
 }
 
+export interface ICrudController {
+  findMany: (req: Request, res: Response) => void;
+  create: (req: Request, res: Response) => void;
+  delete: (req: Request, res: Response) => void;
+  deleteMany: (req: Request, res: Response) => void;
+  update: (req: Request, res: Response) => void;
+}
+
 /**
  * A generic CRUD controller for handling basic operations on a Prisma model.
  * It provides methods to get all entries, add a new entry, edit an existing entry,
  * delete a specific entry, and delete all entries.
  */
-export class CrudController {
+export class CrudController implements ICrudController {
   protected delegate: CrudDelegate;
 
   constructor(delegate: CrudDelegate) {

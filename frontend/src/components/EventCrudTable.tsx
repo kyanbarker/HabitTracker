@@ -5,10 +5,11 @@ import { useEffect, useState } from "react";
 import { OmitId } from "src/util/util";
 import { eventApi, seriesApi } from "../util/api";
 import { CrudTable } from "./CrudTable";
+import { eventBus, SERIES_CHANGED_EVENT } from "../util/eventBus";
 
 const eventColumns: GridColDef[] = [
   { field: "id", headerName: "ID", type: "number" },
-  { field: "seriesName", headerName: "Series Name", type: "string" },
+  { field: "seriesName", headerName: "Series", type: "string" },
   { field: "value", headerName: "Value", type: "number" },
   {
     field: "date",
@@ -27,13 +28,17 @@ export function EventCrudTable() {
   // we have to call it seriesList because an element of the list is a series
   // if we called the list series, it would be confusing
   const [seriesList, setSeriesList] = useState<Series[] | null>(null);
+  const [seriesVersion, setSeriesVersion] = useState(0);
 
   useEffect(() => {
     const fetchSeries = async () => {
       const data = await seriesApi.findMany();
       setSeriesList(data);
+      setSeriesVersion((v) => v + 1);
     };
     fetchSeries();
+    const off = eventBus.on(SERIES_CHANGED_EVENT, fetchSeries);
+    return () => off();
   }, []);
 
   // notice we return early if seriesList is null
@@ -114,6 +119,7 @@ export function EventCrudTable() {
       title="Events"
       responseToRows={responseToRows}
       formToInput={formToInput}
+      refreshKey={seriesVersion}
       renderCustomField={renderCustomField}
     />
   );

@@ -22,8 +22,12 @@ interface CrudTableProps<Input, Model, Row extends { id: number }> {
   initialFormState: OmitId<Row>;
   title: string;
   responseToRows: (response: Model) => Row;
+  /** When this value changes, the table will re-fetch rows. */
+  refreshKey?: any;
   /** Transform form data to API input arguments for create/update */
   formToInput?: (form: OmitId<Row>) => Promise<Input> | Input;
+  /** Callback fired after create/update/delete succeeds */
+  onAfterMutate?: () => void;
   /** Custom render function for specific form fields */
   renderCustomField?: (
     field: string,
@@ -31,6 +35,8 @@ interface CrudTableProps<Input, Model, Row extends { id: number }> {
     onChange: (value: any) => void,
     form: OmitId<Row>
   ) => ReactNode | null;
+  /** Optional custom delete flow; if provided, it will be called instead of default delete */
+  onRequestDelete?: (row: Row) => void | Promise<void>;
 }
 
 // I : the type we provide to the API when creating/updating
@@ -42,8 +48,11 @@ export function CrudTable<Input, Model, Row extends { id: number }>({
   initialFormState,
   title,
   responseToRows,
+  refreshKey,
   formToInput,
+  onAfterMutate,
   renderCustomField,
+  onRequestDelete,
 }: CrudTableProps<Input, Model, Row>) {
   const [rows, setRows] = useState<Row[]>([]);
   const [open, setOpen] = useState(false);
@@ -58,7 +67,7 @@ export function CrudTable<Input, Model, Row extends { id: number }>({
   useEffect(() => {
     fetchRows();
     // eslint-disable-next-line
-  }, []);
+  }, [refreshKey]);
 
   const handleOpen = async (row?: Row) => {
     if (row) {
@@ -146,11 +155,13 @@ export function CrudTable<Input, Model, Row extends { id: number }>({
     }
     handleClose();
     fetchRows();
+    onAfterMutate?.();
   };
 
   const handleDelete = async (id: number) => {
     await api.delete(id);
     fetchRows();
+    onAfterMutate?.();
   };
 
   const actionColumn: GridColDef = {
@@ -166,14 +177,28 @@ export function CrudTable<Input, Model, Row extends { id: number }>({
       />,
       <GridActionsCellItem
         label="Delete"
-        onClick={() => handleDelete(params.row.id)}
+        onClick={async () => {
+          if (onRequestDelete) {
+            await onRequestDelete(params.row as Row);
+          } else {
+            await handleDelete(params.row.id);
+          }
+        }}
         showInMenu
       />,
     ],
   };
 
+  // Ensure all non-action columns are left-aligned by default
+  const alignedColumns = columns.map((col) =>
+    col.field === "actions" || col.field === "id"
+      ? col
+      : { ...col, align: col.align ?? "left", headerAlign: col.headerAlign ?? "left" }
+  );
+
   return (
-    <Box sx={{ my: 4 }}>
+    // how do i make it width min content
+    <Box sx={{ my: 4, width: "min-content" }}>
       <Box
         display="flex"
         justifyContent="space-between"
@@ -189,14 +214,14 @@ export function CrudTable<Input, Model, Row extends { id: number }>({
       </Box>
       <DataGrid
         rows={rows}
-        columns={[...columns, actionColumn]}
+        columns={[...alignedColumns, actionColumn]}
         autoHeight
         initialState={{
           pagination: {
-            paginationModel: { page: 0, pageSize: 5 },
+            paginationModel: { page: 0, pageSize: 20 },
           },
         }}
-        pageSizeOptions={[5, 10, 20]}
+        pageSizeOptions={[5, 10, 20, 40]}
         disableRowSelectionOnClick
       />
       <Dialog open={open} onClose={handleClose}>

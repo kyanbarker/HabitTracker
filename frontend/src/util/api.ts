@@ -1,4 +1,4 @@
-import { EventInput, Event, SeriesInput, Series } from "@series-tracker/shared";
+import { Event, EventInput, Series, SeriesInput } from "@series-tracker/shared";
 
 const API_BASE = "http://localhost:3001/api";
 
@@ -19,11 +19,13 @@ export class CrudApi<I, O> {
     });
     return res.json();
   }
-  async update(id: number, data: I): Promise<O> {
+  async update(id: number, data: Partial<I>): Promise<O> {
+    // Allow partial updates; backend supports PATCH semantics
+    const body = data as Partial<I>;
     const res = await fetch(`${API_BASE}/${this.base}/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
+      body: JSON.stringify(body),
     });
     return res.json();
   }

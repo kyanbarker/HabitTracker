@@ -4,6 +4,7 @@ import { Request, Response } from "express";
 import { CrudController } from "./crudController";
 import { prisma } from "./prisma";
 import { LoggingCrudController } from "./loggingCrudController";
+import { EventController } from "./eventController";
 
 const app = express();
 app.use(cors({ origin: "http://localhost:3000" }));
@@ -27,7 +28,7 @@ app.patch("/api/series/:id", seriesController.update);
 // ============================================================================
 
 const eventController = new LoggingCrudController(
-  new CrudController(prisma.event)
+  new EventController(prisma.event)
 );
 app.get("/api/events", eventController.findMany);
 app.post("/api/events", eventController.create);

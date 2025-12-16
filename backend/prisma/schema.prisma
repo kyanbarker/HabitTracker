@@ -11,7 +11,7 @@ generator client {
 model Event {
   id       Int      @id @default(autoincrement())
   seriesId Int
-  series   Series   @relation(fields: [seriesId], references: [id])
+  series   Series   @relation(fields: [seriesId], references: [id], onDelete: Cascade)
   value    Float
   date     DateTime @default(now())
   notes    String

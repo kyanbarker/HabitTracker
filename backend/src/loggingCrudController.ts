@@ -1,14 +1,14 @@
 import { Request, Response } from "express";
-import { CrudController } from "./crudController";
+import { ICrudController } from "./crudController";
 
 /**
  * A logging wrapper for CrudController that logs all incoming requests
  * before delegating to the underlying controller.
  */
-export class LoggingCrudController {
-  private controller: CrudController;
+export class LoggingCrudController implements ICrudController {
+  private controller: ICrudController;
 
-  constructor(controller: CrudController) {
+  constructor(controller: ICrudController) {
     this.controller = controller;
   }
 
