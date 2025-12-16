@@ -1,5 +1,5 @@
 import { GridColDef } from "@mui/x-data-grid";
-import { SeriesInput, SeriesOutput, SeriesRow } from "@series-tracker/shared";
+import { Series, SeriesInput } from "@series-tracker/shared";
 import { seriesApi } from "../util/api";
 import { CrudTable } from "./CrudTable";
 
@@ -10,14 +10,14 @@ const seriesColumns: GridColDef[] = [
 
 export function SeriesCrudTable() {
   return (
-    <CrudTable<SeriesInput, SeriesOutput, SeriesRow>
+    <CrudTable<SeriesInput, Series, Series>
       columns={seriesColumns}
       api={seriesApi}
       initialFormState={{
         name: "",
       }}
       title="Series"
-      responseToRows={x => x}
+      responseToRows={(x) => x}
     />
   );
 }

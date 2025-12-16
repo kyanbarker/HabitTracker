@@ -1,10 +1,7 @@
-export interface SeriesInput {
-  name: string;
-}
 
-export interface SeriesOutput {
+export interface Series {
   id: number;
   name: string;
 }
 
-export interface SeriesRow extends SeriesOutput {}
+export interface SeriesInput extends Omit<Series, "id"> {}

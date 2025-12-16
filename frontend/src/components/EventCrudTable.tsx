@@ -1,15 +1,10 @@
 import { Autocomplete, TextField } from "@mui/material";
 import { GridColDef } from "@mui/x-data-grid";
-import {
-  EventInput,
-  EventOutput,
-  EventRow,
-  SeriesOutput,
-} from "@series-tracker/shared";
+import { Event, EventInput, Series } from "@series-tracker/shared";
 import { useEffect, useState } from "react";
+import { OmitId } from "src/util/util";
 import { eventApi, seriesApi } from "../util/api";
 import { CrudTable } from "./CrudTable";
-import { OmitId } from "src/util/util";
 
 const eventColumns: GridColDef[] = [
   { field: "id", headerName: "ID", type: "number" },
@@ -24,10 +19,14 @@ const eventColumns: GridColDef[] = [
   { field: "notes", headerName: "Notes", type: "string" },
 ];
 
+export interface EventRow extends Omit<Event, "seriesId"> {
+  seriesName: string;
+}
+
 export function EventCrudTable() {
   // we have to call it seriesList because an element of the list is a series
   // if we called the list series, it would be confusing
-  const [seriesList, setSeriesList] = useState<SeriesOutput[] | null>(null);
+  const [seriesList, setSeriesList] = useState<Series[] | null>(null);
 
   useEffect(() => {
     const fetchSeries = async () => {
@@ -37,11 +36,14 @@ export function EventCrudTable() {
     fetchSeries();
   }, []);
 
+  // notice we return early if seriesList is null
+  // notice we return after setting up the use effect
+  // if we returned before setting up the use effect, the effect would never run
   if (seriesList === null) {
     return <div>Loading...</div>;
   }
 
-  const formToPayload = async (form: OmitId<EventRow>): Promise<EventInput> => {
+  const formToInput = async (form: OmitId<EventRow>): Promise<EventInput> => {
     // Transform EventForm back to Event by looking up series ID
     const series = seriesList.find((s) => s.name === form.seriesName);
     if (!series) {
@@ -57,7 +59,7 @@ export function EventCrudTable() {
     };
   };
 
-  const responseToRows = (event: EventOutput): EventRow => {
+  const responseToRows = (event: Event): EventRow => {
     const series = seriesList.find((s) => s.id === event.seriesId);
     if (!series) {
       throw new Error(`Series with ID "${event.seriesId}" not found.`);
@@ -100,7 +102,7 @@ export function EventCrudTable() {
   };
 
   return (
-    <CrudTable<EventInput, EventOutput, EventRow>
+    <CrudTable<EventInput, Event, EventRow>
       columns={eventColumns}
       api={eventApi}
       initialFormState={{
@@ -111,7 +113,7 @@ export function EventCrudTable() {
       }}
       title="Events"
       responseToRows={responseToRows}
-      formToPayload={formToPayload}
+      formToInput={formToInput}
       renderCustomField={renderCustomField}
     />
   );

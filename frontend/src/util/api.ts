@@ -1,4 +1,4 @@
-import { EventInput, EventOutput, SeriesInput, SeriesOutput } from "@series-tracker/shared";
+import { EventInput, Event, SeriesInput, Series } from "@series-tracker/shared";
 
 const API_BASE = "http://localhost:3001/api";
 
@@ -32,13 +32,13 @@ export class CrudApi<I, O> {
   }
 }
 
-export class SeriesApi extends CrudApi<SeriesInput, SeriesOutput> {
+export class SeriesApi extends CrudApi<SeriesInput, Series> {
   constructor() {
     super("series");
   }
 }
 
-export class EventApi extends CrudApi<EventInput, EventOutput> {
+export class EventApi extends CrudApi<EventInput, Event> {
   constructor() {
     super("events");
   }

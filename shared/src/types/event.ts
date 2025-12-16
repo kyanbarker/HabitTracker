@@ -1,11 +1,4 @@
-export interface EventInput {
-  seriesId: number;
-  value: number;
-  date: Date;
-  notes: string;
-}
-
-export interface EventOutput {
+export interface Event {
   seriesId: number;
   value: number;
   date: Date;
@@ -13,10 +6,8 @@ export interface EventOutput {
   id: number;
 }
 
-export interface EventRow {
+export interface EventInput extends Omit<Event, "id"> {}
+
+export interface EventRow extends Omit<Event, "seriesId"> {
   seriesName: string;
-  value: number;
-  date: Date;
-  notes: string;
-  id: number;
 }

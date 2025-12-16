@@ -16,42 +16,42 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { OmitId } from "src/util/util";
 
-interface CrudTableProps<I, O, V extends { id: number }> {
+interface CrudTableProps<Input, Model, Row extends { id: number }> {
   columns: GridColDef[];
-  api: CrudApi<I, O>;
-  initialFormState: OmitId<V>;
+  api: CrudApi<Input, Model>;
+  initialFormState: OmitId<Row>;
   title: string;
-  responseToRows: (response: O) => V;
-  /** Transform form data to API payload for create/update */
-  formToPayload?: (form: OmitId<V>) => Promise<I>;
+  responseToRows: (response: Model) => Row;
+  /** Transform form data to API input arguments for create/update */
+  formToInput?: (form: OmitId<Row>) => Promise<Input> | Input;
   /** Custom render function for specific form fields */
   renderCustomField?: (
     field: string,
     value: any,
     onChange: (value: any) => void,
-    form: OmitId<V>
+    form: OmitId<Row>
   ) => ReactNode | null;
 }
 
 // I : the type we provide to the API when creating/updating
 // O : the type we receive from the API when fetching
 // R : the type we use in the table rows and form (may differ from O)
-export function CrudTable<I, O, R extends { id: number }>({
+export function CrudTable<Input, Model, Row extends { id: number }>({
   columns,
   api,
   initialFormState,
   title,
   responseToRows,
-  formToPayload,
+  formToInput,
   renderCustomField,
-}: CrudTableProps<I, O, R>) {
-  const [rows, setRows] = useState<R[]>([]);
+}: CrudTableProps<Input, Model, Row>) {
+  const [rows, setRows] = useState<Row[]>([]);
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState<OmitId<R>>(initialFormState);
+  const [form, setForm] = useState<OmitId<Row>>(initialFormState);
   const [editingId, setEditingId] = useState<number | null>(null);
 
   const fetchRows = async () => {
-    const data: O[] = await api.findMany();
+    const data: Model[] = await api.findMany();
     setRows(data.map(responseToRows));
   };
 
@@ -60,7 +60,7 @@ export function CrudTable<I, O, R extends { id: number }>({
     // eslint-disable-next-line
   }, []);
 
-  const handleOpen = async (row?: R) => {
+  const handleOpen = async (row?: Row) => {
     if (row) {
       setForm(row);
       setEditingId(row.id);
@@ -77,12 +77,12 @@ export function CrudTable<I, O, R extends { id: number }>({
     setEditingId(null);
   };
 
-  const handleChange = (key: keyof OmitId<R>, value: any) => {
+  const handleChange = (key: keyof OmitId<Row>, value: any) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
   const renderFormField = (col: GridColDef) => {
-    const fieldName = col.field as keyof OmitId<R>;
+    const fieldName = col.field as keyof OmitId<Row>;
     const fieldValue = form[fieldName];
 
     // Check if there's a custom renderer for this field
@@ -138,11 +138,11 @@ export function CrudTable<I, O, R extends { id: number }>({
   };
 
   const handleSubmit = async () => {
-    const payload = formToPayload ? await formToPayload(form) : (form as any);
+    const inputArgs = formToInput ? await formToInput(form) : (form as any);
     if (editingId != null) {
-      await api.update(editingId, payload);
+      await api.update(editingId, inputArgs);
     } else {
-      await api.create(payload);
+      await api.create(inputArgs);
     }
     handleClose();
     fetchRows();
