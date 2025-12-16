@@ -30,32 +30,30 @@ export class EventController implements ICrudController {
   };
 
   update = (req: Request, res: Response) => {
-    (async () => {
-      try {
-        (async () => {
-          const { seriesId } = req.body ?? {};
-          if (seriesId != null) {
-            const idNum = Number(seriesId);
-            if (!Number.isFinite(idNum)) {
-              res.status(400).json({ message: "seriesId must be a number" });
-              return;
-            }
-            const exists = await prisma.series.findUnique({
-              where: { id: idNum },
-            });
-            if (!exists) {
-              res
-                .status(400)
-                .json({ message: `Target series ${idNum} does not exist` });
-              return;
-            }
+    try {
+      (async () => {
+        const { seriesId } = req.body ?? {};
+        if (seriesId != null) {
+          const idNum = Number(seriesId);
+          if (!Number.isFinite(idNum)) {
+            res.status(400).json({ message: "seriesId must be a number" });
+            return;
           }
-          this.crudController.update(req, res);
-        })();
-      } catch (error) {
-        console.error(error);
-        res.status(500).json(error);
-      }
-    })();
+          const exists = await prisma.series.findUnique({
+            where: { id: idNum },
+          });
+          if (!exists) {
+            res
+              .status(400)
+              .json({ message: `Target series ${idNum} does not exist` });
+            return;
+          }
+        }
+        this.crudController.update(req, res);
+      })();
+    } catch (error) {
+      console.error(error);
+      res.status(500).json(error);
+    }
   };
 }

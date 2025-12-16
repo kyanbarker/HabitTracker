@@ -90,7 +90,6 @@ export function EventCrudTable() {
           options={seriesList.map((s) => s.name)}
           onChange={(_, newValue) => onChange(newValue || "")}
           value={value}
-          freeSolo
           renderInput={(params) => (
             <TextField
               {...params}

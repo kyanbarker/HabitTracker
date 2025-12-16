@@ -139,15 +139,15 @@ export function CrudTable<Input, Model, Row extends { id: number }>({
         margin="dense"
         label={col.headerName}
         fullWidth
-        value={fieldValue ?? ""}
-        onChange={(e) => handleChange(fieldName, e.target.value)}
+        defaultValue={fieldValue ?? ""}
+        onBlur={(e) => handleChange(fieldName, e.target.value)}
         type={col.type === "number" ? "number" : "text"}
       />
     );
   };
 
   const handleSubmit = async () => {
-    const inputArgs = formToInput ? await formToInput(form) : (form as any);
+    const inputArgs = formToInput ? await formToInput(form) : (form as Input);
     if (editingId != null) {
       await api.update(editingId, inputArgs);
     } else {
@@ -197,7 +197,6 @@ export function CrudTable<Input, Model, Row extends { id: number }>({
   );
 
   return (
-    // how do i make it width min content
     <Box sx={{ my: 4, width: "min-content" }}>
       <Box
         display="flex"

@@ -8,7 +8,7 @@ import { useCallback, useMemo, useState } from "react";
 
 const seriesColumns: GridColDef[] = [
   { field: "id", headerName: "ID", type: "number" },
-  { field: "name", headerName: "Name", type: "string" },
+  { field: "name", headerName: "Name", width: 400, type: "string" },
 ];
 
 export function SeriesCrudTable() {
